@@ -7,7 +7,7 @@ using System.Text;
 namespace pga.core.DTOs
 {
     [Table(Name = "master_data")]
-    internal class DTOMasterData : MasterRecord
+    public class DTOMasterData : MasterRecord
     {
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace pga.core
 {
-    internal class MasterData : MasterRecordsTable<DTOMasterData>
+    public class MasterData : MasterRecordsTable<DTOMasterData>
     {
         private const string PARAMUserAdminMD5 = "UserAdminMD5";
         private const string PARAMPasswordAdminMD5 = "PasswordAdminMD5";
@@ -40,5 +40,8 @@ namespace pga.core
         internal MasterData(ConnectionParameters param) : base(param)
         {
         }
+
+        public MasterData() : base(Init.ConnectionParameters)
+        { }
     }
 }

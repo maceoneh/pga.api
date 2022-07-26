@@ -5,7 +5,7 @@ using System.Text;
 
 namespace pga.core
 {
-    abstract internal class Base : IDisposable
+    abstract public class Base : IDisposable
     {
         private DataBaseLogic _db_logic = null;
         private bool _dispose_db_logic = false;
