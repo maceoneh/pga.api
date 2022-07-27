@@ -2,6 +2,7 @@
 using es.dmoreno.utils.serialize;
 using Microsoft.AspNetCore.Mvc.Filters;
 using pga.api.DTOs;
+using pga.core.Exceptions;
 using System.Text;
 
 namespace pga.api
@@ -24,7 +25,12 @@ namespace pga.api
             {
                 e.Error.Code = (context.Exception as PGAAPIException).StatusCode;
                 e.Error.Message = (context.Exception as PGAAPIException).StatusMessage;
-            }            
+            }
+            if (context.Exception is RegisterExistsException)
+            {
+                e.Error.Code = StatusCodes.Status406NotAcceptable;
+                e.Error.Message = (context.Exception as RegisterExistsException).Message;
+            }
             else
             {
                 e.Error.Code = StatusCodes.Status500InternalServerError;

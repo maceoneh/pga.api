@@ -55,6 +55,7 @@ namespace pga.core
             }))
             {
                 await db.Management.createAlterTableAsync<DTOUser>();
+                await db.Management.createAlterTableAsync<DTOUserProfile>();
                 await db.Management.createAlterTableAsync<DTOMasterData>();
             }
         }
