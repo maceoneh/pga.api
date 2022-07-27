@@ -16,5 +16,13 @@ namespace pga.api.Controllers
                 return await uhelper.Add(user);
             }
         }
+
+        [HttpGet("users")]
+        public async Task<List<DTOUser>> GFetList()
+        {
+            return new List<DTOUser> { 
+                new DTOUser { UserMD5 = "aaaaaa", PasswordMD5 = "bbbbbbb" }
+            };
+        }
     }
 }
