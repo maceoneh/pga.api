@@ -9,7 +9,7 @@ namespace pga.api.Controllers
     public class AdministrationController : Controller
     {
         [HttpPost("users")]
-        public async Task<bool> AddUser(DTOUser user)
+        public async Task<bool> AddUser([FromBody] DTOUser user)
         {
             using (var uhelper = new Users())
             {

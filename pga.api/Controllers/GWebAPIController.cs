@@ -18,5 +18,11 @@ namespace pga.api.Controllers
 
             return r;
         }
+
+        [HttpGet("sample_error")]
+        public async Task SampleException()
+        {
+            throw new Exception("Sample exception");
+        }
     }
 }

@@ -13,8 +13,8 @@ namespace pga.core
         }
 
         public async Task<bool> Add(DTOUser u)
-        {
-            return await this.DBLogic.Statement.insertAsync(u);
+        {            
+            return await (await this.DBLogic.ProxyStatement<DTOUser>()).insertAsync(u);
         }
     }
 }

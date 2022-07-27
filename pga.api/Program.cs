@@ -1,3 +1,4 @@
+using pga.api;
 using pga.core;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddControllers().AddNewtonsoftJson();
+builder.Services.AddMvc().AddMvcOptions(option => {
+    option.Filters.Add(new FilterException());
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
