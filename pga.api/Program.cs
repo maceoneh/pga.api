@@ -24,6 +24,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 app.MapControllers();
+app.UseMiddleware<AuthMiddleware>();
 
 Init.DataPath = @"C:\Proyectos\programdata\pga.api\";
 await Init.BuildEnvironment();

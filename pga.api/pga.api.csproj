@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\utils\utils.corenet\ns.utils.corenet.csproj" />
     <ProjectReference Include="..\pga.core\pga.core.csproj" />
   </ItemGroup>
 
