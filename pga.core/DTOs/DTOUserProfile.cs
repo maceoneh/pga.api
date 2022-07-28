@@ -1,4 +1,5 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
+using es.dmoreno.utils.dataaccess.filters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,9 +9,15 @@ namespace pga.core.DTOs
     [Table(Name = "user_profile", FilePerTable = true)]
     public class DTOUserProfile
     {
+        public const string TAG = "DTOUserProfile";
+        public const string FilterUUID = TAG + "UUID";
+        public const string IdxUUID = TAG + "UUID";
+
         [Field(FieldName = "ref_user", IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int RefUser { get; set; }
 
+        [Index(Name = IdxUUID, Unique = true)]
+        [Filter(Name = FilterUUID)]
         [Field(FieldName = "uuid", Type = ParamType.String)]
         public string UUID { get; set; }
 

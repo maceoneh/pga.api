@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using es.dmoreno.utils.security;
+using Microsoft.AspNetCore.Mvc;
 using pga.core;
 using pga.core.DTOs;
 
@@ -9,7 +10,7 @@ namespace pga.api.Controllers
     public class AdministrationController : Controller
     {
         [HttpPost("users")]
-        public async Task<bool> AddUser([FromBody] DTOUser user)
+        public async Task<string> AddUser([FromBody] DTOUser user)
         {
             using (var uhelper = new Users())
             {
@@ -18,11 +19,39 @@ namespace pga.api.Controllers
         }
 
         [HttpGet("profiles")]
-        public async Task<List<DTOUser>> GFetList()
+        public async Task<List<DTOUserProfile>> GetProfileList()
         {
-            return new List<DTOUser> { 
-                new DTOUser { UserMD5 = "aaaaaa", PasswordMD5 = "bbbbbbb" }
-            };
+            using (var uhelper = new Users())
+            {
+                return await uhelper.GetProfiles();
+            }
+        }
+
+        [HttpGet("profiles/{uuid_base64}")]
+        public async Task<DTOUserProfile> GetProfile(string uuid_base64)
+        {
+            using (var uhelper = new Users())
+            {
+                return await uhelper.GetProfile(Base64.Decode(uuid_base64));
+            }
+        }
+
+        [HttpDelete("profiles/{uuid_base64}")]
+        public async Task<bool> DeleteProfile(string uuid_base64)
+        {
+            using (var uhelper = new Users())
+            {
+                return await uhelper.DeleteProfile(Base64.Decode(uuid_base64));
+            }
+        }
+
+        [HttpPut("profiles")]
+        public async Task<bool> UpdateProfile([FromBody] DTOUserProfile p)
+        {
+            using (var uhelper = new Users())
+            {
+                return await uhelper.SetProfile(p);
+            }
         }
     }
 }

@@ -13,8 +13,10 @@ namespace pga.core.DTOs
     {
         public const string TAG = "DTOUser";
         public const string FilterUserMD5 = TAG + "UserMD5";
+        public const string FilterID = TAG + "ID";
         public const string IdxUserMD5 = TAG + "UserMD5";
 
+        [Filter(Name = FilterID)]
         [Field(FieldName = "id", IsPrimaryKey = true, Type = ParamType.Int32, IsAutoincrement = true)]
         internal int ID { get; set; }
 

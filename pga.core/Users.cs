@@ -15,7 +15,7 @@ namespace pga.core
         {
         }
 
-        public async Task<bool> Add(DTOUser u)
+        public async Task<string> Add(DTOUser u)
         {
             var db_user = await this.DBLogic.ProxyStatement<DTOUser>();
             //Se comprueba si existe el usuario que se quiere dar de alta
@@ -32,12 +32,13 @@ namespace pga.core
                 {
                     //Se genera el profile vacio
                     var db_user_profile = await this.DBLogic.ProxyStatement<DTOUserProfile>();
-                    await db_user_profile.insertAsync(new DTOUserProfile
+                    var new_profile = new DTOUserProfile
                     {
                         RefUser = u.ID,
                         UUID = Guid.NewGuid().ToString()
-                    });
-                    return true;
+                    };
+                    await db_user_profile.insertAsync(new_profile);
+                    return new_profile.UUID;
                 }
                 throw new Exception("Can't access to profile table");
             }
@@ -45,6 +46,107 @@ namespace pga.core
             {
                 throw new RegisterExistsException("User " + u.UserMD5 + " exists");
             }
+        }
+
+        public async Task<List<DTOUserProfile>> GetProfiles()
+        {
+            var db_profiles = await this.DBLogic.ProxyStatement<DTOUserProfile>();
+            return await db_profiles.selectAsync<DTOUserProfile>();
+        }
+
+        public async Task<DTOUserProfile> GetProfile(string uuid)
+        {
+            var db_profiles = await this.DBLogic.ProxyStatement<DTOUserProfile>();
+            var profile_in_db = await db_profiles.FirstIfExistsAsync<DTOUserProfile>(new StatementOptions { 
+                Filters = new List<Filter> { 
+                    new Filter { Name = DTOUserProfile.FilterUUID, ObjectValue = uuid, Type = FilterType.Equal }
+                }
+            });
+            if (profile_in_db == null)
+            {
+                throw new KeyNotFoundException("User with UUID " + uuid + " not found");
+            }
+            else
+            {
+                return profile_in_db;
+            }
+        }
+
+        public async Task<bool> SetProfile(DTOUserProfile p)
+        {
+            //Se busca el profile en la BD
+            var db_profiles = await this.DBLogic.ProxyStatement<DTOUserProfile>();
+            var profile_in_db = await db_profiles.FirstIfExistsAsync<DTOUserProfile>(new StatementOptions { 
+                Filters = new List<Filter> { 
+                    new Filter { Name = DTOUserProfile.FilterUUID, ObjectValue = p.UUID, Type = FilterType.Equal }
+                }
+            });
+            if (profile_in_db == null)
+            {
+                throw new KeyNotFoundException("User with UUID " + p.UUID + " not found");
+            }
+            else
+            {
+                //Se actualizan los datos
+                profile_in_db.Name = p.Name;
+                profile_in_db.Surname = p.Surname;
+                profile_in_db.Address = p.Address;
+                profile_in_db.PostalCode = p.PostalCode;
+                profile_in_db.Province = p.Province;
+                profile_in_db.Population = p.Population;
+                profile_in_db.eMail = p.eMail;
+                return await db_profiles.updateAsync(profile_in_db);
+            }
+        }
+
+        public async Task<bool> DeleteProfile(string uuid)
+        {
+            var db_profiles = await this.DBLogic.ProxyStatement<DTOUserProfile>();
+            var profile_in_db = await db_profiles.FirstIfExistsAsync<DTOUserProfile>(new StatementOptions
+            {
+                Filters = new List<Filter> {
+                    new Filter { Name = DTOUserProfile.FilterUUID, ObjectValue = uuid, Type = FilterType.Equal }
+                }
+            });
+            if (profile_in_db == null)
+            {
+                throw new KeyNotFoundException("User with UUID " + uuid + " not found");
+            }
+            else
+            {
+                //Se obtiene el usuario asociado
+                var db_users = await this.DBLogic.ProxyStatement<DTOUser>();
+                var user_in_db = await db_users.FirstIfExistsAsync<DTOUser>(new StatementOptions { 
+                    Filters = new List<Filter> { 
+                        new Filter { Name = DTOUser.FilterID, ObjectValue = profile_in_db.RefUser, Type = FilterType.Equal }
+                    }
+                });
+                var transaction_id = new object();
+                try
+                {                    
+                    db_profiles.beginTransaction(transaction_id);
+                    if (user_in_db != null)
+                    {
+                        db_users.beginTransaction(transaction_id);
+                        await db_users.deleteAsync(user_in_db);
+                    }
+                    await db_profiles.deleteAsync(profile_in_db);
+                    if (user_in_db != null)
+                    {
+                        db_users.acceptTransaction(transaction_id);
+                    }
+                    db_profiles.acceptTransaction(transaction_id);
+                }
+                catch
+                {
+                    if (user_in_db != null)
+                    {
+                        db_users.refuseTransaction(transaction_id);
+                    }
+                    db_profiles.refuseTransaction(transaction_id);
+                }
+                return true;
+            }            
         }
     }
 }

@@ -19,28 +19,29 @@ namespace pga.api
             if (AuthMiddleware.ResourcesByTypeWithAuthorization.Count() == 0)
             {
                 AuthMiddleware.ResourcesByTypeWithAuthorization = new string[] { 
-                    //Forma de realizar checkeo (equal)
+                    //Forma de realizar checkeo (equal o start)
                     //Recurso
                     //Metodo
                     //Tipo de autorizacion
-                    "equal",
-                    "/administration/users",
+
+                    "start",
+                    "/administration/",
                     "POST",
                     "BASIC_1",
 
-                    "equal",
-                    "/administration/users/",
-                    "POST",
-                    "BASIC_1",
-
-                    "equal",
-                    "/administration/profiles",
+                    "start",
+                    "/administration/",
                     "GET",
                     "BASIC_1",
 
-                    "equal",
-                    "/administration/profiles/",
-                    "GET",
+                    "start",
+                    "/administration/",
+                    "PUT",
+                    "BASIC_1",
+
+                    "start",
+                    "/administration/",
+                    "DELETE",
                     "BASIC_1"
                 };
             }
