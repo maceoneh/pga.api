@@ -15,41 +15,55 @@ namespace pga.api
                     //"POST"
                 };
             }
+
+            if (AuthMiddleware.ResourcesByTypeWithAuthorization.Count() == 0)
+            {
+                AuthMiddleware.ResourcesByTypeWithAuthorization = new string[] { 
+                    //Forma de realizar checkeo (equal)
+                    //Recurso
+                    //Metodo
+                    //Tipo de autorizacion
+                    "equal",
+                    "/administration/users",
+                    "POST",
+                    "BASIC_1",
+
+                    "equal",
+                    "/administration/users/",
+                    "POST",
+                    "BASIC_1",
+
+                    "equal",
+                    "/administration/profiles",
+                    "GET",
+                    "BASIC_1",
+
+                    "equal",
+                    "/administration/profiles/",
+                    "GET",
+                    "BASIC_1"
+                };
+            }
         }
 
         protected async override Task<bool> checkValidationAsync(HttpContext context)
         {
-            var auth_type = context.Request.Headers["_auth_type"];
-            try
+            var auth_type = GetAuthorizationType(context);
+            switch (auth_type)
             {
-                switch (auth_type)
-                {
-                    case "basic":
-                        return await this.checkBasic(context);
-                    case "bearer":
-                        return await this.checkBearer(context);
-                    default:
-                        return false;
-                }
-            }
-            catch (Exception e)
-            {
-                return false;
+                case "BASIC_1":
+                    return await this.checkBasic1(context);
+                default:
+                    return false;
             }
         }
 
-        private async Task<bool> checkBasic(HttpContext context)
+        private async Task<bool> checkBasic1(HttpContext context)
         {
-            var path = context.Request.Path;
-            if (path.Equals("/administration/users") || path.Equals("/administration/users/"))
-            {
-                var mdhelper = new MasterData();
-                //, context.Request.Headers["_password"]
-                var admin_user = await mdhelper.GetUserAdminMD5();
-                var admin_password = await mdhelper.GetPasswordAdminMD5();
-                return admin_user.Equals(context.Request.Headers["_user"]) && admin_password.Equals(context.Request.Headers["_password"]);
-            }
-            return false;
+            var mdhelper = new MasterData();
+            var admin_user = await mdhelper.GetUserAdminMD5();
+            var admin_password = await mdhelper.GetPasswordAdminMD5();
+            return admin_user.Equals(context.Request.Headers["_user"]) && admin_password.Equals(context.Request.Headers["_password"]);
         }
 
         private async Task<bool> checkBearer(HttpContext context)

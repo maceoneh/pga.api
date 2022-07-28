@@ -17,7 +17,7 @@ namespace pga.api.Controllers
             }
         }
 
-        [HttpGet("users")]
+        [HttpGet("profiles")]
         public async Task<List<DTOUser>> GFetList()
         {
             return new List<DTOUser> { 

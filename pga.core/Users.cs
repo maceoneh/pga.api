@@ -45,8 +45,6 @@ namespace pga.core
             {
                 throw new RegisterExistsException("User " + u.UserMD5 + " exists");
             }
-
-            return false;
         }
     }
 }
