@@ -42,7 +42,17 @@ namespace pga.api
                     "start",
                     "/administration/",
                     "DELETE",
-                    "BASIC_1"
+                    "BASIC_1",
+
+                    "start",
+                    "/gwebapi",
+                    "POST",
+                    "SCRIPT_1",
+
+                    "start",
+                    "/gwebapi/",
+                    "POST",
+                    "SCRIPT_1",
                 };
             }
         }
@@ -53,18 +63,25 @@ namespace pga.api
             switch (auth_type)
             {
                 case "BASIC_1":
-                    return await this.checkBasic1(context);
+                    return await this.CheckBasic1(context);
+                case "SCRIPT_1":
+                    return await this.SheckScript1(context);
                 default:
                     return false;
             }
         }
 
-        private async Task<bool> checkBasic1(HttpContext context)
+        private async Task<bool> CheckBasic1(HttpContext context)
         {
             var mdhelper = new MasterData();
             var admin_user = await mdhelper.GetUserAdminMD5();
             var admin_password = await mdhelper.GetPasswordAdminMD5();
             return admin_user.Equals(context.Request.Headers["_user"]) && admin_password.Equals(context.Request.Headers["_password"]);
+        }
+
+        private async Task<bool> SheckScript1(HttpContext context)
+        {
+            return false;
         }
 
         private async Task<bool> checkBearer(HttpContext context)

@@ -4,6 +4,7 @@ using es.dmoreno.utils.security;
 using pga.core.DTOs;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,8 +31,9 @@ namespace pga.core
 
         static public async Task BuildEnvironment()
         {
-            await BuildDataBase();
+            await BuildCoreDataBase();
             await InitializeData();
+            await BuildBoxes();
         }
 
         static private async Task InitializeData()
@@ -46,8 +48,9 @@ namespace pga.core
             }
         }
 
-        static private async Task BuildDataBase()
+        static private async Task BuildCoreDataBase()
         {
+            //Se crea la base de datos del core
             using (var db = new DataBaseLogic(new ConnectionParameters
             {
                 File = DataPath + "pga.core.db",
@@ -60,6 +63,12 @@ namespace pga.core
             }
         }
 
-
+        static private async Task BuildBoxes()
+        {
+            if (!Directory.Exists(DataPath + "boxes"))
+            {
+                Directory.CreateDirectory(DataPath + "boxes");
+            }
+        }
     }
 }
