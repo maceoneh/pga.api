@@ -13,6 +13,8 @@ namespace pga.core
     static public class Init
     {
         public static string DataPath { get; set; } = "";
+        public static string BoxesPath { get => DataPath + "boxes"; }
+
         internal static ConnectionParameters ConnectionParameters
         {
             get

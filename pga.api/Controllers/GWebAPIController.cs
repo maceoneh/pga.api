@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using pga.api.DTOs;
+using pga.core;
 using System.Text.Json.Nodes;
 
 namespace pga.api.Controllers
@@ -12,11 +13,15 @@ namespace pga.api.Controllers
         [HttpPost()]
         public async Task<Object> ProcessPost([FromBody] DTORequestGWebAPI<Object> o)
         {
-            var r = new DTOResponseGWebAPI<bool> { 
-                Response = true
-            };
-
-            return r;
+            using (var boxhelper = new Box(o.Provider))
+            {
+                await boxhelper.CreateUpdateDatabase();
+                var r = new DTOResponseGWebAPI<bool>
+                {
+                    Response = true
+                };
+                return r;
+            }            
         }
 
         [HttpGet("sample_error")]

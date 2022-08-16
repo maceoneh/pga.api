@@ -13,6 +13,9 @@ namespace pga.api
                     //"regex",
                     //"/api/licenses/user$",
                     //"POST"
+                    "start",
+                    "/gwebapi",
+                    "POST"
                 };
             }
 
@@ -42,20 +45,36 @@ namespace pga.api
                     "start",
                     "/administration/",
                     "DELETE",
-                    "BASIC_1",
-
-                    "start",
-                    "/gwebapi",
-                    "POST",
-                    "SCRIPT_1",
-
-                    "start",
-                    "/gwebapi/",
-                    "POST",
-                    "SCRIPT_1",
+                    "BASIC_1"
                 };
             }
         }
+
+        //protected override  void ExtractAuthorizationFromBody(HttpContext context)
+        //{
+        //    if (context.Request.Path.Value.StartsWith("/gwebapi"))
+        //    {
+        //        var mem = new MemoryStream();
+        //        context.Request.Body.CopyTo(mem);
+        //        mem.Position = 0;
+        //        context.Request.Body = mem;
+
+        //        using (var memstream = new MemoryStream())
+        //        {
+        //            mem.CopyTo(memstream);
+        //            mem.Position = 0;
+        //            memstream.Position = 0;
+        //            using (var reader = new StreamReader(memstream))
+        //            {
+        //                var content = reader.ReadToEnd();
+        //                if (!string.IsNullOrWhiteSpace(content))
+        //                {
+                            
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
 
         protected async override Task<bool> checkValidationAsync(HttpContext context)
         {
@@ -64,8 +83,6 @@ namespace pga.api
             {
                 case "BASIC_1":
                     return await this.CheckBasic1(context);
-                case "SCRIPT_1":
-                    return await this.SheckScript1(context);
                 default:
                     return false;
             }
@@ -77,11 +94,6 @@ namespace pga.api
             var admin_user = await mdhelper.GetUserAdminMD5();
             var admin_password = await mdhelper.GetPasswordAdminMD5();
             return admin_user.Equals(context.Request.Headers["_user"]) && admin_password.Equals(context.Request.Headers["_password"]);
-        }
-
-        private async Task<bool> SheckScript1(HttpContext context)
-        {
-            return false;
         }
 
         private async Task<bool> checkBearer(HttpContext context)
