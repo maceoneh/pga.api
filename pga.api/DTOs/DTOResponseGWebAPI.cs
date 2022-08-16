@@ -9,6 +9,9 @@ namespace pga.api.DTOs
         [DataMember(Name = "aktype")]
         public string AKType { get; set; }
 
+        [DataMember(Name = "token")]
+        public string Token { get; set; }
+
         [DataMember(Name = "provider")]
         public string Provider { get; set; }
 
@@ -19,6 +22,6 @@ namespace pga.api.DTOs
         public bool Debug { get; set; }
 
         [DataMember(Name = "execution_time")]
-        public decimal ExecutionTime { get; set; }
+        public double ExecutionTime { get; set; }
     }
 }

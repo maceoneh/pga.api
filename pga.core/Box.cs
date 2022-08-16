@@ -14,12 +14,31 @@ namespace pga.core
     public class Box : IDisposable
     {
         public string UUID { get; private set; }
+
         internal string DataPath { get => Init.BoxesPath + @"\" + this.UUID; }
+
+        internal ConnectionParameters ConnectionParameters
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(DataPath))
+                {
+                    throw new Exception("DataPath is not set");
+                }
+                return new ConnectionParameters
+                {
+                    File = DataPath + @"\data.db",
+                    Type = DBMSType.SQLite
+                };
+            }
+        }
 
         public static string LastUpdateToken { get; private set; } = Token.generate(new ConfigToken { Length = 20, Letters = true, Numbers = true, UpperCase = true });
 
         private DataBaseLogic _db_logic = null;
+
         private bool _dispose_db_logic = true;
+
         private bool disposedValue;
 
         internal DataBaseLogic DBLogic { get => this._db_logic; }
@@ -35,7 +54,7 @@ namespace pga.core
         }
 
         private void Initialize(Box b, string uuid)
-        {            
+        {
             if (b != null)
             {
                 this.UUID = b.UUID;
@@ -82,11 +101,11 @@ namespace pga.core
         public async Task CreateUpdateDatabase()
         {
             var path = Init.BoxesPath + @"\" + this.UUID;
-            string txt = null;            
+            string txt = null;
             using (var filehelper = new TextPlainFile(path + @"\version.json"))
             {
                 txt = filehelper.get();
-            }            
+            }
             var update = string.IsNullOrWhiteSpace(txt);
             if (!update)
             {
@@ -96,6 +115,7 @@ namespace pga.core
             if (update)
             {
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxAppointment>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxMasterData>();
                 using (var filehelper = new TextPlainFile(path + @"\version.json"))
                 {
                     filehelper.set(JSon.serializeJSON<DTOBoxVersion>(new DTOBoxVersion { VersionToken = Box.LastUpdateToken, LastUpdateDatabase = DateTime.Now }));
