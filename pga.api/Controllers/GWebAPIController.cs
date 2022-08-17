@@ -18,8 +18,7 @@ namespace pga.api.Controllers
         [HttpPost()]
         public async Task<Object> ProcessPost([FromBody] DTORequestGWebAPI<Object> o)
         {
-            return await this.Process(o);
-                        
+            return await this.Process(o);                        
         }
 
         [HttpGet("sample_error")]

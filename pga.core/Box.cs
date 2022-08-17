@@ -116,6 +116,9 @@ namespace pga.core
             {
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxAppointment>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxMasterData>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubject>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubjectRoot>();
+
                 using (var filehelper = new TextPlainFile(path + @"\version.json"))
                 {
                     filehelper.set(JSon.serializeJSON<DTOBoxVersion>(new DTOBoxVersion { VersionToken = Box.LastUpdateToken, LastUpdateDatabase = DateTime.Now }));
