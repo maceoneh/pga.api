@@ -11,9 +11,11 @@ namespace pga.core.DTOsBox
     public class DTOBoxSubject
     {
         public const string TAG = "DTOBoxSubject";
+        public const string FilterID = TAG + "ID";
         public const string FilterUUID = TAG + "UUID";
         public const string IdxUUID = TAG + "UUID";
 
+        [Filter(Name = FilterID)]
         [Field(FieldName = "id", IsAutoincrement = true, IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int ID  { get; set; }
 

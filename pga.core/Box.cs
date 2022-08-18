@@ -118,12 +118,23 @@ namespace pga.core
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxMasterData>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubject>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubjectRoot>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxSession>();
 
                 using (var filehelper = new TextPlainFile(path + @"\version.json"))
                 {
                     filehelper.set(JSon.serializeJSON<DTOBoxVersion>(new DTOBoxVersion { VersionToken = Box.LastUpdateToken, LastUpdateDatabase = DateTime.Now }));
                 }
             }
+        }
+
+        public BoxSubject GetBoxSubjectHelper()
+        {
+            return new BoxSubject(this);
+        }
+
+        public BoxSessions GetBoxSessionsHelper()
+        {
+            return new BoxSessions(this);
         }
 
         protected virtual void Dispose(bool disposing)
