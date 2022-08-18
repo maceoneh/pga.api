@@ -11,10 +11,45 @@ namespace pga.core
 {
     public class BoxSessions
     {
-        private Box Box { get; }
+        private Box Box { get; }    
+
         internal BoxSessions(Box b)
         {
             this.Box = b;
+        }
+
+        internal async Task<DTOBoxSubject> WhoIs()
+        {
+            var db_sessions = await this.Box.DBLogic.ProxyStatement<DTOBoxSession>();
+            var session_to_check = await db_sessions.FirstIfExistsAsync<DTOBoxSession>(new StatementOptions { 
+                Filters = new List<Filter> { 
+                    new Filter { Name = DTOBoxSession.FilterToken, ObjectValue = this.Box.AccessToken, Type = FilterType.Equal }
+                }
+            });
+            if (session_to_check != null)
+            {
+                //Esta dentro del TTL
+                if (session_to_check.RefreshTime.AddMinutes(session_to_check.TTL) > DateTime.Now)
+                {
+                    //Se comprueba si pertenece a un usuario
+                    var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
+                    var subject = await db_subjects.FirstIfExistsAsync<DTOBoxSubject>(new StatementOptions
+                    {
+                        Filters = new List<Filter> {
+                            new Filter { Name = DTOBoxSubject.FilterID, ObjectValue = session_to_check.RefSubject, Type = FilterType.Equal }
+                        }
+                    });
+                    return subject;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public async Task<string> GetTokenByUser(string username, string password)
@@ -96,6 +131,19 @@ namespace pga.core
             {
                 session_to_check.RefreshTime = DateTime.Now;
                 await db_sessions.updateAsync(session_to_check);
+            }
+        }
+
+        public async Task<bool> CreateSession()
+        {
+            var who_is = await this.Box.WhoIs();
+            if (await this.Box.GetBoxSubjectHelper().IsRoot(who_is))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }

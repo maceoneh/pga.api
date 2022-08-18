@@ -2,6 +2,7 @@
 using pga.core.DTOsBox;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.SymbolStore;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,6 +37,12 @@ namespace pga.core
                 await db_subjectroot.insertAsync(root);
             }
             return root;
+        }
+
+        internal async Task<bool> IsRoot(DTOBoxSubject s)
+        {
+            var actual_root = await this.GetRoot();
+            return s.ID == actual_root.RefSubject;
         }
     }
 }

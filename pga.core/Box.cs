@@ -6,6 +6,7 @@ using pga.core.DTOsBox;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,6 +15,10 @@ namespace pga.core
     public class Box : IDisposable
     {
         public string UUID { get; private set; }
+
+        public string AccessToken { get; private set; }
+
+        internal DTOBoxSubject Subject { get; private set; } = null;
 
         internal string DataPath { get => Init.BoxesPath + @"\" + this.UUID; }
 
@@ -43,21 +48,22 @@ namespace pga.core
 
         internal DataBaseLogic DBLogic { get => this._db_logic; }
 
-        public Box(string uuid)
+        public Box(string uuid, string accessToken = "")
         {
-            this.Initialize(null, uuid);
+            this.Initialize(null, uuid, accessToken);
         }
 
         internal Box(Box b)
         {
-            this.Initialize(b, null);
+            this.Initialize(b, null, null);
         }
 
-        private void Initialize(Box b, string uuid)
+        private void Initialize(Box b, string uuid, string accessToken)
         {
             if (b != null)
             {
                 this.UUID = b.UUID;
+                this.AccessToken = b.AccessToken;
                 this._db_logic = b._db_logic;
                 this._dispose_db_logic = false;
                 if (string.IsNullOrWhiteSpace(this.UUID))
@@ -68,6 +74,7 @@ namespace pga.core
             else
             {
                 this.UUID = uuid;
+                this.AccessToken = accessToken;
                 if (string.IsNullOrWhiteSpace(this.UUID))
                 {
                     throw new ArgumentException("UUID can't be empty");
@@ -125,6 +132,15 @@ namespace pga.core
                     filehelper.set(JSon.serializeJSON<DTOBoxVersion>(new DTOBoxVersion { VersionToken = Box.LastUpdateToken, LastUpdateDatabase = DateTime.Now }));
                 }
             }
+        }
+
+        public async Task<DTOBoxSubject> WhoIs()
+        {
+            if (this.Subject == null)
+            {
+                this.Subject = await this.GetBoxSessionsHelper().WhoIs();
+            }
+            return this.Subject;
         }
 
         public BoxSubject GetBoxSubjectHelper()

@@ -2,6 +2,7 @@
 using es.dmoreno.utils.security;
 using es.dmoreno.utils.serialize;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.IIS.Core;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using pga.api.DTOs;
@@ -82,6 +83,9 @@ namespace pga.api.Controllers
                     var credentials = JSon.JObjectToType<DTORequestGWebAPIGetToken>(request.Parameters as JObject);
                     response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));                    
                     break;
+                case "CREATESESSION":
+                    response.Response = await this.CreateSession(request.Provider, request.Token);
+                    break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
             }
@@ -96,6 +100,14 @@ namespace pga.api.Controllers
             using (var boxhelper = new Box(uuid_provider))
             {
                 return await boxhelper.GetBoxSessionsHelper().GetTokenByUser(username, password);
+            }
+        }
+
+        private async Task<bool> CreateSession(string uuid_provider, string token)
+        {
+            using (var boxhelper = new Box(uuid_provider, token))
+            {
+                return await boxhelper.GetBoxSessionsHelper().CreateSession();
             }
         }
     }
