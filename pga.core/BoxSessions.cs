@@ -150,6 +150,7 @@ namespace pga.core
                         new Filter { Name = DTOBoxSubjectEmploy.FilterUserPGAMobile, ObjectValue = user_pgamobile, Type = FilterType.Equal }
                     }
                 });
+                //Si no existe se crea
                 if (employ == null)
                 {
                     if (create_employ_if_not_exist)
@@ -159,15 +160,25 @@ namespace pga.core
                             Name = user_pgamobile,
                             eMail = user_pgamobile
                         });
-                        await boxsubjecthelper.AddSubjectTo(new_subject, EBoxSubjectType.Employ);
+                        employ = new DTOBoxSubjectEmploy { UserPGAMobile = user_pgamobile };
+                        await boxsubjecthelper.AddSubjectTo(new_subject, EBoxSubjectType.Employ, employ);
                     }
                     else
                     {
                         throw new RegisterNotExistsException("Employ '" + user_pgamobile + "' not exists");
                     }
                 }
-
-                return true;
+                //Validar los datos de la sesion a crear
+                //Se genera la sesion
+                var db_sessions = await this.Box.DBLogic.ProxyStatement<DTOBoxSession>();
+                return await db_sessions.insertAsync(new DTOBoxSession { 
+                    ApplicationKey = appkey,
+                    CreationTime = DateTime.Now,
+                    RefreshTime = DateTime.Now,
+                    RefSubject = employ.RefSubject,
+                    Token = newtoken,
+                    TTL = ttl
+                });
             }
             else
             {
