@@ -2,9 +2,11 @@
 using es.dmoreno.utils.dataaccess.filters;
 using es.dmoreno.utils.security;
 using pga.core.DTOsBox;
+using pga.core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace pga.core
@@ -55,7 +57,7 @@ namespace pga.core
         public async Task<string> GetTokenByUser(string username, string password)
         {
             var subjecthelper = this.Box.GetBoxSubjectHelper();
-            var root = await subjecthelper.GetRoot();
+            var root = await subjecthelper.GetRoot();            
             //El usuario es el root
             if (root.UserMD5 == username && root.PasswordMD5 == password)
             {
@@ -134,11 +136,37 @@ namespace pga.core
             }
         }
 
-        public async Task<bool> CreateSession()
+        public async Task<bool> CreateSession(string user_pgamobile, string appkey, string newtoken, int ttl, bool create_employ_if_not_exist = false)
         {
             var who_is = await this.Box.WhoIs();
-            if (await this.Box.GetBoxSubjectHelper().IsRoot(who_is))
+            var boxsubjecthelper = this.Box.GetBoxSubjectHelper();
+            if (await boxsubjecthelper.IsRoot(who_is))
             {
+                //Se busca el empleado
+                var db_employee = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
+                var employ = await db_employee.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions
+                {
+                    Filters = new List<Filter> { 
+                        new Filter { Name = DTOBoxSubjectEmploy.FilterUserPGAMobile, ObjectValue = user_pgamobile, Type = FilterType.Equal }
+                    }
+                });
+                if (employ == null)
+                {
+                    if (create_employ_if_not_exist)
+                    {
+                        var new_subject = await boxsubjecthelper.CreateSubject(new DTOBoxSubject
+                        {
+                            Name = user_pgamobile,
+                            eMail = user_pgamobile
+                        });
+                        await boxsubjecthelper.AddSubjectTo(new_subject, EBoxSubjectType.Employ);
+                    }
+                    else
+                    {
+                        throw new RegisterNotExistsException("Employ '" + user_pgamobile + "' not exists");
+                    }
+                }
+
                 return true;
             }
             else

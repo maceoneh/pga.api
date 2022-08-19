@@ -84,7 +84,8 @@ namespace pga.api.Controllers
                     response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));                    
                     break;
                 case "CREATESESSION":
-                    response.Response = await this.CreateSession(request.Provider, request.Token);
+                    var infotoken = JSon.JObjectToType<DTORequestGWebAPICreateSesion>(request.Parameters as JObject);
+                    response.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
                     break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
@@ -103,11 +104,11 @@ namespace pga.api.Controllers
             }
         }
 
-        private async Task<bool> CreateSession(string uuid_provider, string token)
+        private async Task<bool> CreateSession(string uuid_provider, string token, DTORequestGWebAPICreateSesion info_newtoken)
         {
             using (var boxhelper = new Box(uuid_provider, token))
             {
-                return await boxhelper.GetBoxSessionsHelper().CreateSession();
+                return await boxhelper.GetBoxSessionsHelper().CreateSession(user_pgamobile: info_newtoken.User, appkey: info_newtoken.ApplicationKey, newtoken: info_newtoken.NewToken, ttl: info_newtoken.TTL, create_employ_if_not_exist: true);
             }
         }
     }

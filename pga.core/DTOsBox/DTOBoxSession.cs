@@ -36,5 +36,11 @@ namespace pga.core.DTOsBox
 
         [Field(FieldName = "ttl", Type = ParamType.Int32)]
         public int TTL { get; set; }
+
+        /// <summary>
+        /// Indica una key que representa un tipo de aplicación
+        /// </summary>
+        [Field(FieldName = "application_key", Type = ParamType.String)]
+        public string ApplicationKey { get; set; }
     }
 }

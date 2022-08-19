@@ -125,6 +125,7 @@ namespace pga.core
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxMasterData>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubject>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubjectRoot>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubjectEmploy>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSession>();
 
                 using (var filehelper = new TextPlainFile(path + @"\version.json"))
