@@ -91,6 +91,9 @@ namespace pga.api.Controllers
                     var inforemovetoken = JSon.JObjectToType<DTORequestGWebAPIRemoveSession>(request.Parameters as JObject);
                     response.Response = await this.RemoveSession(request.Provider, request.Token, inforemovetoken);
                     break;
+                case "REFRESHTOKEN":
+                    response.Response = true;
+                    break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
             }
