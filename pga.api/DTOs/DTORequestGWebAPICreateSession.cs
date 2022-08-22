@@ -3,7 +3,7 @@
 namespace pga.api.DTOs
 {
     [DataContract]
-    public class DTORequestGWebAPICreateSesion
+    public class DTORequestGWebAPICreateSession
     {
         [DataMember(Name = "user")]
         public string User { get; set; }

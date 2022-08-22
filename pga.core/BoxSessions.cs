@@ -136,6 +136,34 @@ namespace pga.core
             }
         }
 
+        public async Task<bool> RemoveSession(string appkey, string token)
+        {
+            var who_is = await this.Box.WhoIs();
+            var boxsubjecthelper = this.Box.GetBoxSubjectHelper();
+            if (await boxsubjecthelper.IsRoot(who_is))
+            {
+                var db_sessions = await this.Box.DBLogic.ProxyStatement<DTOBoxSession>();
+                var session_to_delete = await db_sessions.FirstIfExistsAsync<DTOBoxSession>(new StatementOptions { 
+                    Filters = new List<Filter> {
+                        new Filter { Name = DTOBoxSession.FilterToken, ObjectValue = token, Type = FilterType.Equal },
+                        new Filter { Name = DTOBoxSession.FilterApplicationKey, ObjectValue = appkey, Type = FilterType.Equal }
+                    }
+                });
+                if (session_to_delete != null)
+                {
+                    return await db_sessions.deleteAsync(session_to_delete);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> CreateSession(string user_pgamobile, string appkey, string newtoken, int ttl, bool create_employ_if_not_exist = false)
         {
             var who_is = await this.Box.WhoIs();
@@ -169,6 +197,7 @@ namespace pga.core
                     }
                 }
                 //Validar los datos de la sesion a crear
+                //
                 //Se genera la sesion
                 var db_sessions = await this.Box.DBLogic.ProxyStatement<DTOBoxSession>();
                 return await db_sessions.insertAsync(new DTOBoxSession { 

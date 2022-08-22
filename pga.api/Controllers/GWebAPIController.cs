@@ -84,8 +84,12 @@ namespace pga.api.Controllers
                     response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));                    
                     break;
                 case "CREATESESSION":
-                    var infotoken = JSon.JObjectToType<DTORequestGWebAPICreateSesion>(request.Parameters as JObject);
+                    var infotoken = JSon.JObjectToType<DTORequestGWebAPICreateSession>(request.Parameters as JObject);
                     response.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
+                    break;
+                case "REMOVESESSION":
+                    var inforemovetoken = JSon.JObjectToType<DTORequestGWebAPIRemoveSession>(request.Parameters as JObject);
+                    response.Response = await this.RemoveSession(request.Provider, request.Token, inforemovetoken);
                     break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
@@ -104,11 +108,19 @@ namespace pga.api.Controllers
             }
         }
 
-        private async Task<bool> CreateSession(string uuid_provider, string token, DTORequestGWebAPICreateSesion info_newtoken)
+        private async Task<bool> CreateSession(string uuid_provider, string token, DTORequestGWebAPICreateSession info_newtoken)
         {
             using (var boxhelper = new Box(uuid_provider, token))
             {
                 return await boxhelper.GetBoxSessionsHelper().CreateSession(user_pgamobile: info_newtoken.User, appkey: info_newtoken.ApplicationKey, newtoken: info_newtoken.NewToken, ttl: info_newtoken.TTL, create_employ_if_not_exist: true);
+            }
+        }
+
+        private async Task<bool> RemoveSession(string uuid_provider, string token, DTORequestGWebAPIRemoveSession info_oldtoken)
+        {
+            using (var boxhelper = new Box(uuid_provider, token))
+            {
+                return await boxhelper.GetBoxSessionsHelper().RemoveSession(info_oldtoken.ApplicationKey, info_oldtoken.OldToken);
             }
         }
     }

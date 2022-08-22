@@ -2,6 +2,7 @@
 using es.dmoreno.utils.dataaccess.filters;
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text;
 
 namespace pga.core.DTOsBox
@@ -11,6 +12,7 @@ namespace pga.core.DTOsBox
     {
         public const string TAG = "DTOBoxSession";
         public const string FilterToken = TAG + "Token";
+        public const string FilterApplicationKey = TAG + "ApplicationKey";
 
         [Field(FieldName = "id", IsAutoincrement = true, IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int ID { get; set; }
@@ -40,6 +42,7 @@ namespace pga.core.DTOsBox
         /// <summary>
         /// Indica una key que representa un tipo de aplicación
         /// </summary>
+        [Filter(Name = FilterApplicationKey)]
         [Field(FieldName = "application_key", Type = ParamType.String)]
         public string ApplicationKey { get; set; }
     }
