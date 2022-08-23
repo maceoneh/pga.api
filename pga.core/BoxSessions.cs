@@ -57,7 +57,7 @@ namespace pga.core
         public async Task<string> GetTokenByUser(string username, string password)
         {
             var subjecthelper = this.Box.GetBoxSubjectHelper();
-            var root = await subjecthelper.GetRoot();            
+            var root = await subjecthelper.GetRootAsync();            
             //El usuario es el root
             if (root.UserMD5 == username && root.PasswordMD5 == password)
             {
@@ -140,7 +140,7 @@ namespace pga.core
         {
             var who_is = await this.Box.WhoIs();
             var boxsubjecthelper = this.Box.GetBoxSubjectHelper();
-            if (await boxsubjecthelper.IsRoot(who_is))
+            if (await boxsubjecthelper.IsRootAsync(who_is))
             {
                 var db_sessions = await this.Box.DBLogic.ProxyStatement<DTOBoxSession>();
                 var session_to_delete = await db_sessions.FirstIfExistsAsync<DTOBoxSession>(new StatementOptions { 
@@ -168,7 +168,7 @@ namespace pga.core
         {
             var who_is = await this.Box.WhoIs();
             var boxsubjecthelper = this.Box.GetBoxSubjectHelper();
-            if (await boxsubjecthelper.IsRoot(who_is))
+            if (await boxsubjecthelper.IsRootAsync(who_is))
             {
                 //Se busca el empleado
                 var db_employee = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
@@ -183,13 +183,13 @@ namespace pga.core
                 {
                     if (create_employ_if_not_exist)
                     {
-                        var new_subject = await boxsubjecthelper.CreateSubject(new DTOBoxSubject
+                        var new_subject = await boxsubjecthelper.CreateSubjectAsync(new DTOBoxSubject
                         {
                             Name = user_pgamobile,
                             eMail = user_pgamobile
                         });
                         employ = new DTOBoxSubjectEmploy { UserPGAMobile = user_pgamobile };
-                        await boxsubjecthelper.AddSubjectTo(new_subject, EBoxSubjectType.Employ, employ);
+                        await boxsubjecthelper.AddSubjectToAsync(new_subject, EBoxSubjectType.Employ, employ);
                     }
                     else
                     {

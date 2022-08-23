@@ -127,6 +127,7 @@ namespace pga.core
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubjectRoot>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubjectEmploy>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSession>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxFile>();
 
                 using (var filehelper = new TextPlainFile(path + @"\version.json"))
                 {
@@ -152,6 +153,11 @@ namespace pga.core
         public BoxSessions GetBoxSessionsHelper()
         {
             return new BoxSessions(this);
+        }
+
+        public BoxFile GetBoxFileHelper()
+        {
+            return new BoxFile(this);
         }
 
         protected virtual void Dispose(bool disposing)

@@ -19,15 +19,15 @@ namespace pga.core
             this.Box = b;
         }
 
-        internal async Task<DTOBoxSubjectRoot> GetRoot()
+        internal async Task<DTOBoxSubjectRoot> GetRootAsync()
         {
             var db_subjectroot = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectRoot>();
             var root = await db_subjectroot.FirstIfExistsAsync<DTOBoxSubjectRoot>();
             if (root == null)
             {
                 //No existe usuario root, se crea uno por defecto
-                var subject = await this.CreateSubject(new DTOBoxSubject { Name = "Root" });
-                await this.AddSubjectTo(subject, EBoxSubjectType.Root);
+                var subject = await this.CreateSubjectAsync(new DTOBoxSubject { Name = "Root" });
+                await this.AddSubjectToAsync(subject, EBoxSubjectType.Root);
                 //var db_subject = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
                 //await db_subject.insertAsync(new DTOBoxSubject {
                 //    Name = "Root",
@@ -43,9 +43,9 @@ namespace pga.core
             return root;
         }
 
-        internal async Task<bool> IsRoot(DTOBoxSubject s)
+        internal async Task<bool> IsRootAsync(DTOBoxSubject s)
         {
-            var actual_root = await this.GetRoot();
+            var actual_root = await this.GetRootAsync();
             return s.ID == actual_root.RefSubject;
         }
 
@@ -57,13 +57,14 @@ namespace pga.core
         /// <param name="t"></param>
         /// <param name="o">Inicialización del objeto a crear si procede</param>
         /// <returns></returns>
-        internal async Task<bool> AddSubjectTo(DTOBoxSubject s, EBoxSubjectType t, DTOBoxSubjectBaseRef o = null)
+        internal async Task<bool> AddSubjectToAsync(DTOBoxSubject s, EBoxSubjectType t, DTOBoxSubjectBaseRef o = null)
         {
             if (t == EBoxSubjectType.Root)
             {
                 var db_subjectroot = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectRoot>();
-                var root = await db_subjectroot.FirstIfExistsAsync<DTOBoxSubjectRoot>(new StatementOptions { 
-                    Filters = new List<Filter> { 
+                var root = await db_subjectroot.FirstIfExistsAsync<DTOBoxSubjectRoot>(new StatementOptions
+                {
+                    Filters = new List<Filter> {
                         new Filter { Name = DTOBoxSubjectRoot.FilterRefSubject, ObjectValue = s.ID, Type = FilterType.Equal }
                     }
                 });
@@ -90,10 +91,11 @@ namespace pga.core
                 }
             }
             else if (t == EBoxSubjectType.Employ)
-            { 
+            {
                 var db_subjectemploy = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
-                var employ = await db_subjectemploy.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions { 
-                    Filters = new List<Filter> { 
+                var employ = await db_subjectemploy.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions
+                {
+                    Filters = new List<Filter> {
                         new Filter { Name = DTOBoxSubjectEmploy.FilterRefSubject, ObjectValue = s.ID, Type = FilterType.Equal }
                     }
                 });
@@ -112,7 +114,7 @@ namespace pga.core
                         };
                     }
                     else
-                    { 
+                    {
                         employ.RefSubject = s.ID;
                     }
                     return await db_subjectemploy.insertAsync(employ);
@@ -127,12 +129,68 @@ namespace pga.core
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        public async Task<DTOBoxSubject> CreateSubject(DTOBoxSubject s)
+        public async Task<DTOBoxSubject> CreateSubjectAsync(DTOBoxSubject s)
         {
             var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
             s.UUID = Guid.NewGuid().ToString();
             await db_subjects.insertAsync(s);
             return s;
+        }
+
+        /// <summary>
+        /// Busca el sujeto indicado y si existe la agrega el ID y UUID correspondiente
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        internal async Task<bool> ExistsAndLoadAsync(DTOBoxSubject s)
+        {
+            var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
+            //Si solo incluye en UUID entonces lo busca por UUID
+            if (s.OnlyContainUUID)
+            {
+                var subject = await db_subjects.FirstIfExistsAsync<DTOBoxSubject>(new StatementOptions
+                {
+                    Filters = new List<Filter> {
+                        new Filter { Name = DTOBoxSubject.FilterUUID, ObjectValue = s.UUID, Type = FilterType.Equal }
+                }
+                });
+                if (subject != null)
+                {
+                    s.ID = subject.ID;
+                    s.UUID = subject.UUID;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                //Se busca por todos los datos
+                var subject = await db_subjects.FirstIfExistsAsync<DTOBoxSubject>(new StatementOptions
+                {
+                    Filters = new List<Filter> {
+                        new Filter { Name = DTOBoxSubject.FilterName, ObjectValue = s.Name, Type = FilterType.Equal },
+                        new Filter { Name = DTOBoxSubject.FilterSurName, ObjectValue = s.Surname, Type = FilterType.Equal },
+                        new Filter { Name = DTOBoxSubject.FilterAddress, ObjectValue = s.Address, Type = FilterType.Equal },
+                        new Filter { Name = DTOBoxSubject.FilterPostalCode, ObjectValue = s.PostalCode, Type = FilterType.Equal },
+                        new Filter { Name = DTOBoxSubject.FilterProvince, ObjectValue = s.Province, Type = FilterType.Equal },
+                        new Filter { Name = DTOBoxSubject.FilterPopulation, ObjectValue = s.Population, Type = FilterType.Equal },
+                        new Filter { Name = DTOBoxSubject.FilterEMail, ObjectValue = s.eMail, Type = FilterType.Equal }
+                }
+                });
+                if (subject != null)
+                {
+                    s.ID = subject.ID;
+                    s.UUID = subject.UUID;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
     }
 }

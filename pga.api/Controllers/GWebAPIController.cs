@@ -83,6 +83,7 @@ namespace pga.api.Controllers
                     var credentials = JSon.JObjectToType<DTORequestGWebAPIGetToken>(request.Parameters as JObject);
                     response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));                    
                     break;
+                //Funciones para el administrador
                 case "CREATESESSION":
                     var infotoken = JSon.JObjectToType<DTORequestGWebAPICreateSession>(request.Parameters as JObject);
                     response.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
