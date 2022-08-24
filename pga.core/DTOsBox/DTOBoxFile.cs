@@ -2,7 +2,9 @@
 using es.dmoreno.utils.dataaccess.filters;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 
 namespace pga.core.DTOsBox
@@ -25,30 +27,38 @@ namespace pga.core.DTOsBox
         [Index(Name = IdxRefReceiver)]
         [Field(FieldName = "ref_receiver", Type = ParamType.Int32, DefaultValue = int.MinValue)]
         internal int RefReceiver { get; set; }
-        public DTOBoxSubject Receiver { get; set; } = null;
+
+        [JsonPropertyName("receiver")]
+        public DTOBoxSubject? Receiver { get; set; } = null;
 
         [Filter(Name = FilterRefProvider)]
         [Index(Name = IdxRefProvider)]
         [Field(FieldName = "ref_provider", Type = ParamType.Int32, DefaultValue = int.MinValue)]
         internal int RefProvider { get; set; }
-        public DTOBoxSubject Provider { get; set; } = null;
+
+        [JsonPropertyName("provider")]
+        
+        public DTOBoxSubject? Provider { get; set; } = null;
 
         [Filter(Name = FilterRefIntermediary)]
         [Index(Name = IdxRefIntermediary)]
         [Field(FieldName = "ref_intermediary", Type = ParamType.Int32, DefaultValue = int.MinValue)]
         internal int RefIntermediary { get; set; }
-        public DTOBoxSubject Intermediary { get; set; } = null;
+        
+        public DTOBoxSubject? Intermediary { get; set; } = null;
 
         [Filter(Name = FilterID)]
         [Field(FieldName = "id", IsAutoincrement = true, IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int ID { get; set; }
 
+        
         [Index(Name = IdxUUID, Unique = true)]
         [Filter(Name = FilterUUID)]
         [Field(FieldName = "uuid", Type = ParamType.String)]
-        public string UUID { get; set; }
+        public string? UUID { get; set; }
 
+        
         [Field(FieldName = "description", Type = ParamType.String)]
-        public string Description { get; set; }        
+        public string? Description { get; set; }        
     }
 }

@@ -2,11 +2,14 @@
 using es.dmoreno.utils.dataaccess.filters;
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Xml.Linq;
 
 namespace pga.core.DTOsBox
-{
+{    
     [Table(Name = "subjects")]
     public class DTOBoxSubject
     {
@@ -48,48 +51,102 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "id", IsAutoincrement = true, IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int ID  { get; set; }
 
+        [JsonPropertyName("uuid")]
         [Index(Name = IdxUUID, Unique = true)]
         [Filter(Name = FilterUUID)]
         [Field(FieldName = "uuid", Type = ParamType.String)]
-        public string UUID { get; set; }
+        public string? UUID { get; set; }
 
+        [JsonPropertyName("name")]
         [Index(Name = IdxAllPublicFields)]
         [Index(Name = IdxName)]
         [Filter(Name = FilterName)]
         [Field(FieldName = "name", Type = ParamType.String)]
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
+        
         [Index(Name = IdxName)]
         [Index(Name = IdxAllPublicFields)]
         [Filter(Name = FilterSurName)]
         [Field(FieldName = "surname", Type = ParamType.String)]
-        public string Surname { get; set; }
+        public string? Surname { get; set; }
 
+        [JsonPropertyName("address")]
         [Index(Name = IdxAddress)]
         [Index(Name = IdxAllPublicFields)]
         [Filter(Name = FilterAddress)]
-        [Field(FieldName = "address", Type = ParamType.String)]
-        public string Address { get; set; }
+        [Field(FieldName = "address", Type = ParamType.String, AllowNull = true)]
+        public string? Address { get; set; }
 
+        [JsonPropertyName("postalCode")]
         [Index(Name = IdxAllPublicFields)]
         [Filter(Name = FilterPostalCode)]
-        [Field(FieldName = "postalcode", Type = ParamType.String)]
-        public string PostalCode { get; set; }
+        [Field(FieldName = "postalcode", Type = ParamType.String, AllowNull = true)]
+        public string? PostalCode { get; set; }
 
+        [JsonPropertyName("province")]
         [Index(Name = IdxAllPublicFields)]
         [Filter(Name = FilterProvince)]
-        [Field(FieldName = "province", Type = ParamType.String)]
-        public string Province { get; set; }
+        [Field(FieldName = "province", Type = ParamType.String, AllowNull = true)]
+        public string? Province { get; set; }
 
+        [JsonPropertyName("population")]
         [Index(Name = IdxAllPublicFields)]
         [Filter(Name = FilterPopulation)]
-        [Field(FieldName = "population", Type = ParamType.String)]
-        public string Population { get; set; }
+        [Field(FieldName = "population", Type = ParamType.String, AllowNull = true)]
+        public string? Population { get; set; }
 
+        [JsonPropertyName("eMail")]
         [Index(Name = IdxEmail)]
         [Index(Name = IdxAllPublicFields)]
         [Filter(Name = FilterEMail)]
-        [Field(FieldName = "email", Type = ParamType.String)]
-        public string eMail { get; set; }
+        [Field(FieldName = "email", Type = ParamType.String, AllowNull = true)]
+        public string? eMail { get; set; }
+    }
+
+    public class CustomDTOBoxSubjectJsonConverter : JsonConverter<DTOBoxSubject>
+    {
+        public override bool HandleNull => true;
+
+        public override DTOBoxSubject? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (reader.TokenType != JsonTokenType.StartObject)
+                throw new JsonException("Expected StartObject token");
+
+            var subject = new DTOBoxSubject();
+
+            while (reader.Read())
+            {
+                if (reader.TokenType == JsonTokenType.EndObject)
+                    return subject;
+
+                if (reader.TokenType != JsonTokenType.PropertyName)
+                    throw new JsonException("Expected PropertyName token");
+
+                var propName = reader.GetString();
+                reader.Read();
+
+                switch (propName)
+                {
+                    //case nameof(DTOBoxSubject.)
+                    //case nameof(Message.Id):
+                    //    message.Id = Int32.Parse(reader.GetString());
+                    //    break;
+                    //case nameof(Message.SentAt):
+                    //    message.SentAt = reader.GetDateTime();
+                    //    break;
+                    //case nameof(Message.Text):
+                    //    message.Text = reader.GetString()?.ToUpper();
+                    //    break;
+                }
+            }
+
+            throw new JsonException("Expected EndObject token");
+        }
+
+        public override void Write(Utf8JsonWriter writer, DTOBoxSubject value, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

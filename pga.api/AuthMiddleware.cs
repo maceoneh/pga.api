@@ -15,6 +15,11 @@ namespace pga.api
                     //"POST"
                     "start",
                     "/gwebapi",
+                    "POST",
+
+                    //Pruebas
+                    "start",
+                    "/v1/files",
                     "POST"
                 };
             }
