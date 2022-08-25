@@ -2,6 +2,7 @@
 using es.dmoreno.utils.dataaccess.filters;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -20,12 +21,25 @@ namespace pga.core.DTOsBox
         public const string FilterRefIntermediary = TAG + "RefIntermediary";
         public const string FilterPolicy = TAG + "Policy";
         public const string FilterDate = TAG + "Date";
+        public const string FilterAddress = TAG + "Address";
+        public const string FilterPostalCode = TAG + "PostalCode";
+        public const string FilterProvince = TAG + "Province";
+        public const string FilterPopulation = TAG + "Population";
+        public const string FilterStatus = TAG + "Status";
+        public const string FilterNumber = TAG + "Number";
+        public const string FilterInternalNumber = TAG + "NumberInternal";
         public const string IdxUUID = TAG + "UUID";
         public const string IdxRefReceiver = TAG + "RefInsured";
         public const string IdxRefProvider = TAG + "RefProvider";
         public const string IdxRefIntermediary = TAG + "RefIntermediary";
         public const string IdxPolicy = TAG + "Policy";
-        public const string IdxDate = TAG + "Date";
+        public const string IdxDate = TAG + "Date";        
+        public const string IdxAllAddressFields = TAG + "AllAddressFields";
+        public const string IdxAddress = TAG + "Address";
+        public const string IdxEmail = TAG + "EMail";
+        public const string IdxNumber = TAG + "Number";
+        public const string IdxInternalNumber = TAG + "InternalNumber";
+
 
         [Filter(Name = FilterRefReceiver)]
         [Index(Name = IdxRefReceiver)]
@@ -61,6 +75,16 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "uuid", Type = ParamType.String)]
         public string? UUID { get; set; }
 
+        [Index(Name = IdxNumber)]
+        [Filter(Name = FilterNumber)]
+        [Field(FieldName = "number", Type = ParamType.String)]
+        public string Number { get; set; }
+
+        [Index(Name = IdxInternalNumber)]
+        [Filter(Name = FilterInternalNumber)]
+        [Field(FieldName = "internal_number", Type = ParamType.String)]
+        public string InternalNumber { get; set; }
+
         [JsonPropertyName("policy")]
         [Index(Name = IdxPolicy)]
         [Filter(Name = FilterPolicy)]
@@ -75,6 +99,37 @@ namespace pga.core.DTOsBox
         [Index(Name = IdxDate)]
         [Filter(Name = FilterDate)]
         [Field(FieldName = "file_date", Type = ParamType.DateTime)]
-        public DateTime Date { get; set; }        
+        public DateTime Date { get; set; }
+
+        [JsonPropertyName("status")]
+        [Filter(Name = FilterStatus)]
+        [Field(FieldName = "status", Type = ParamType.Int32, DefaultValue = EBoxAppointmentStatus.InProgress)]
+        public EBoxFileStatus Status { get; set; }
+
+        //Datos de la direccion de la intervencion
+        [JsonPropertyName("address")]
+        [Index(Name = IdxAddress)]
+        [Index(Name = IdxAllAddressFields)]
+        [Filter(Name = FilterAddress)]
+        [Field(FieldName = "address", Type = ParamType.String, AllowNull = true)]
+        public string? Address { get; set; }
+
+        [JsonPropertyName("postalCode")]
+        [Index(Name = IdxAllAddressFields)]
+        [Filter(Name = FilterPostalCode)]
+        [Field(FieldName = "postalcode", Type = ParamType.String, AllowNull = true)]
+        public string? PostalCode { get; set; }
+
+        [JsonPropertyName("province")]
+        [Index(Name = IdxAllAddressFields)]
+        [Filter(Name = FilterProvince)]
+        [Field(FieldName = "province", Type = ParamType.String, AllowNull = true)]
+        public string? Province { get; set; }
+
+        [JsonPropertyName("population")]
+        [Index(Name = IdxAllAddressFields)]
+        [Filter(Name = FilterPopulation)]
+        [Field(FieldName = "population", Type = ParamType.String, AllowNull = true)]
+        public string? Population { get; set; }
     }
 }

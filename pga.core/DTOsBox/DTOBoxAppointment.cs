@@ -37,7 +37,7 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "agreed", Type = ParamType.Boolean, DefaultValue = false)]
         public bool Agreed { get; set; }
 
-        [Field(FieldName = "agreed", Type = ParamType.Int32)]
+        [Field(FieldName = "status", Type = ParamType.Int32)]
         public EBoxAppointmentStatus Status { get; set; } = EBoxAppointmentStatus.InProgress;
 
 

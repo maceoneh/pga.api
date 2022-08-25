@@ -15,13 +15,19 @@ namespace pga.core
             this.Box = b;
         }
 
+        internal async Task<bool> IsOpenAndLoad(DTOBoxFile f)
+        {
+
+            return false;
+        }
+
         /// <summary>
         /// Inserta un expediente en la base de datos
         /// </summary>
         /// <param name="f"></param>
         /// <remarks>Falta comprobar permisos</remarks>
         /// <returns></returns>
-        public async Task<bool> CreateFile(DTOBoxFile f)
+        public async Task<DTOBoxFile> CreateFile(DTOBoxFile f)
         {
             //Comprobar permisos
             this.ValidateCorrectFieldsForCreate(f);
@@ -66,11 +72,11 @@ namespace pga.core
             if (await db_file.insertAsync(f))
             {
                 f.ID = db_file.lastID;
-                return true;
+                return f;
             }
             else
             {
-                return false;
+                return null;
             }
         }
 

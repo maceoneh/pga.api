@@ -138,6 +138,22 @@ namespace pga.core
         }
 
         /// <summary>
+        /// Comprueba si el sujeto existe, si no existe lo crea y si existe devuelve el registro existente
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        public async Task<DTOBoxSubject> LoadOrCreateSubjectAsync(DTOBoxSubject s)
+        {
+            if (!await this.ExistsAndLoadAsync(s))
+            {
+                var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
+                s.UUID = Guid.NewGuid().ToString();
+                await db_subjects.insertAsync(s);                
+            }
+            return s;
+        }
+
+        /// <summary>
         /// Busca el sujeto indicado y si existe la agrega el ID y UUID correspondiente
         /// </summary>
         /// <param name="s"></param>
