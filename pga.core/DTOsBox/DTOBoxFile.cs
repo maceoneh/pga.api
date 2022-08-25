@@ -18,10 +18,14 @@ namespace pga.core.DTOsBox
         public const string FilterRefReceiver = TAG + "RefReceiver";
         public const string FilterRefProvider = TAG + "RefProvider";
         public const string FilterRefIntermediary = TAG + "RefIntermediary";
+        public const string FilterPolicy = TAG + "Policy";
+        public const string FilterDate = TAG + "Date";
         public const string IdxUUID = TAG + "UUID";
         public const string IdxRefReceiver = TAG + "RefInsured";
         public const string IdxRefProvider = TAG + "RefProvider";
         public const string IdxRefIntermediary = TAG + "RefIntermediary";
+        public const string IdxPolicy = TAG + "Policy";
+        public const string IdxDate = TAG + "Date";
 
         [Filter(Name = FilterRefReceiver)]
         [Index(Name = IdxRefReceiver)]
@@ -51,14 +55,26 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "id", IsAutoincrement = true, IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int ID { get; set; }
 
-        
+        [JsonPropertyName("uuid")]
         [Index(Name = IdxUUID, Unique = true)]
         [Filter(Name = FilterUUID)]
         [Field(FieldName = "uuid", Type = ParamType.String)]
         public string? UUID { get; set; }
 
-        
+        [JsonPropertyName("policy")]
+        [Index(Name = IdxPolicy)]
+        [Filter(Name = FilterPolicy)]
+        [Field(FieldName = "policy", Type = ParamType.String)]
+        public string? Policy { get; set; }
+
+        [JsonPropertyName("description")]
         [Field(FieldName = "description", Type = ParamType.String)]
-        public string? Description { get; set; }        
+        public string? Description { get; set; }
+
+        [JsonPropertyName("date")]
+        [Index(Name = IdxDate)]
+        [Filter(Name = FilterDate)]
+        [Field(FieldName = "file_date", Type = ParamType.DateTime)]
+        public DateTime Date { get; set; }        
     }
 }

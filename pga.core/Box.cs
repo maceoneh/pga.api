@@ -122,6 +122,7 @@ namespace pga.core
             if (update)
             {
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxAppointment>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxEmployInAppointment>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxMasterData>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubject>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubjectRoot>();

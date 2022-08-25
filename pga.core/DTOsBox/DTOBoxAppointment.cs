@@ -11,6 +11,11 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "id", IsPrimaryKey = true, IsAutoincrement = true, Type = ParamType.Int32)]
         internal int ID { get; set; }
 
+        [Field(FieldName = "uuid", Type = ParamType.String)]
+        public string UUID { get; set; }
+
+        public List<DTOBoxEmployInAppointment> EmployeesInAppointment { get; set; } = null;
+
         [Field(FieldName = "date_from", Type = ParamType.DateTime)]
         public DateTime DateFrom { get; set; }
 
@@ -18,21 +23,22 @@ namespace pga.core.DTOsBox
         public DateTime DateTo { get; set; }
 
         [Field(FieldName = "ref_receiver", Type = ParamType.Int32, DefaultValue = int.MinValue)]
-        public int RefReceiver { get; set; }
+        public int RefReceiver { get; set; } = int.MinValue;
 
         [Field(FieldName = "ref_file", Type = ParamType.Int32, DefaultValue = int.MinValue)]
-        public int RefFile { get; set; }
+        public int RefFile { get; set; } = int.MinValue;
 
         [Field(FieldName = "description", Type = ParamType.String)]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
-        [Field(FieldName = "description", Type = ParamType.String)]
-        public string GuildDescription { get; set; }
+        [Field(FieldName = "guild_description", Type = ParamType.String)]
+        public string? GuildDescription { get; set; }
 
-        [Field(FieldName = "description", Type = ParamType.Boolean, DefaultValue = false)]
+        [Field(FieldName = "agreed", Type = ParamType.Boolean, DefaultValue = false)]
         public bool Agreed { get; set; }
 
-        public EBoxAppointmentStatus Status { get; set; }
+        [Field(FieldName = "agreed", Type = ParamType.Int32)]
+        public EBoxAppointmentStatus Status { get; set; } = EBoxAppointmentStatus.InProgress;
 
 
 
