@@ -102,5 +102,23 @@ namespace pga.core.DTOsBox
         [Filter(Name = FilterEMail)]
         [Field(FieldName = "email", Type = ParamType.String, AllowNull = true)]
         public string? eMail { get; set; }
+
+        /// <summary>
+        /// Duplica el contenido del sujeto actual en la clase pasada por parámetro
+        /// </summary>
+        /// <param name="s"></param>
+        internal DTOBoxSubject CopyTo(DTOBoxSubject s)
+        {
+            s.Address = this.Address;
+            s.eMail = this.eMail;
+            s.ID = this.ID;
+            s.Name = this.Name;
+            s.Population = this.Population;
+            s.Province = this.Province;
+            s.PostalCode = this.PostalCode;
+            s.Surname = this.Surname;
+            s.UUID = this.UUID;
+            return s;
+        }
     }
 }

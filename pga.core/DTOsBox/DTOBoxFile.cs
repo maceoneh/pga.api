@@ -83,7 +83,7 @@ namespace pga.core.DTOsBox
         [Index(Name = IdxInternalNumber)]
         [Filter(Name = FilterInternalNumber)]
         [Field(FieldName = "internal_number", Type = ParamType.String)]
-        public string InternalNumber { get; set; }
+        public string? InternalNumber { get; set; }
 
         [JsonPropertyName("policy")]
         [Index(Name = IdxPolicy)]
@@ -131,5 +131,49 @@ namespace pga.core.DTOsBox
         [Filter(Name = FilterPopulation)]
         [Field(FieldName = "population", Type = ParamType.String, AllowNull = true)]
         public string? Population { get; set; }
+
+        internal DTOBoxFile CopyTo(DTOBoxFile f)
+        {
+            f.Address = this.Address;
+            f.Date = this.Date;
+            f.Description = this.Description;
+            f.ID = this.ID;
+            f.InternalNumber = this.InternalNumber;
+            f.Number = this.Number;
+            f.Policy = this.Policy;
+            f.Population = this.Population;
+            f.PostalCode = this.PostalCode;
+            f.Province = this.Province;
+            f.RefIntermediary = this.RefIntermediary;
+            f.RefProvider = this.RefProvider;
+            f.RefReceiver = this.RefReceiver;
+            f.Status = this.Status;
+            f.UUID = this.UUID;
+            if (this.Receiver != null)
+            {
+                f.Receiver = this.Receiver.CopyTo(new DTOBoxSubject());
+            }
+            else
+            {
+                f.Receiver = null;
+            }
+            if (this.Provider != null)
+            {
+                f.Provider = this.Provider.CopyTo(new DTOBoxSubject());
+            }
+            else
+            {
+                f.Provider = null;
+            }
+            if (this.Intermediary != null)
+            {
+                f.Intermediary = this.Intermediary.CopyTo(new DTOBoxSubject());
+            }
+            else
+            {
+                f.Intermediary = null;
+            }
+            return f;
+        }
     }
 }

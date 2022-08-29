@@ -162,6 +162,11 @@ namespace pga.core
             return new BoxFile(this);
         }
 
+        public BoxCounters GetBoxCountersHelper()
+        {
+            return new BoxCounters(this);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
