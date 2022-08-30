@@ -10,7 +10,7 @@ namespace pga.api.Controllers
     public class AppointmentsController : Controller
     {
         [HttpPost()]
-        public async Task<string> CreateAppointment([FromBody] DTORequestCreateAppointment a)
+        public async Task<string?> CreateAppointment([FromBody] DTORequestCreateAppointment a)
         {
             using (var boxhelper = new Box("926d3a3d-09d3-4d68-a3e7-88432aadd7cb"))
             {                
@@ -42,7 +42,22 @@ namespace pga.api.Controllers
                     Description = a.Description,
                     Date = a.DateFrom
                 });
-
+                //Se busca al empleado
+                
+                //Se crea una cita en el expediente
+                var new_appointment = await filehelper.AddAppointmentAsync(new DTOBoxAppointment
+                {
+                    Agreed = false,
+                    DateFrom = a.DateFrom,
+                    DateTo = a.DateFrom.AddHours(1),
+                    Description = a.Description,
+                    Status = EBoxAppointmentStatus.InProgress,
+                    GuildDescription = a.Guild
+                }, f); ;
+                if (new_appointment != null)
+                {
+                    return new_appointment.UUID;
+                }
             }
             return null;
         }

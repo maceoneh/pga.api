@@ -43,6 +43,14 @@ namespace pga.core
             return root;
         }
 
+        internal async Task<DTOBoxSubject> GetEmployByPGAMobileUser(string pgamobile_user)
+        {
+            var db_subjectroot = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectRoot>();
+            var employ = await db_subjectroot.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions { 
+                
+            });
+        }
+
         internal async Task<bool> IsRootAsync(DTOBoxSubject s)
         {
             var actual_root = await this.GetRootAsync();

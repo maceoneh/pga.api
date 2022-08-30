@@ -3,8 +3,6 @@ using es.dmoreno.utils.dataaccess.filters;
 using pga.core.DTOsBox;
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace pga.core
@@ -137,7 +135,7 @@ namespace pga.core
             f.Status = EBoxFileStatus.InProgress;
             f.UUID = Guid.NewGuid().ToString();
             var counterhelper = this.Box.GetBoxCountersHelper();
-            f.InternalNumber = (await counterhelper.GetNextAsync(EBoxCounterType.Appointment)).ToString();
+            f.InternalNumber = (await counterhelper.GetNextAsync(EBoxCounterType.AppointmentInternalNumber)).ToString();
             //Se inserta el expediente en la base de datos
             var db_file = await this.Box.DBLogic.ProxyStatement<DTOBoxFile>();
             if (await db_file.insertAsync(f))
@@ -166,6 +164,40 @@ namespace pga.core
             {
                 throw new ArgumentException("Receiver can't be NULL");
             }            
+        }
+
+        /// <summary>
+        /// Agrega una cita en el expediente indicado
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public async Task<DTOBoxAppointment?> AddAppointmentAsync(DTOBoxAppointment a, DTOBoxFile f)
+        {
+            //Se completa información
+            a.UUID = Guid.NewGuid().ToString();
+            a.RefFile = f.ID;
+            a.RefReceiver = f.RefReceiver;
+            //Se agregan registros en la base de datos
+            var db_appointments = await this.Box.DBLogic.ProxyStatement<DTOBoxAppointment>();
+            if (await db_appointments.insertAsync(a))
+            {
+                a.ID = db_appointments.lastID;
+                if (a.EmployeesInAppointment != null)
+                {
+                    var db_employeesinappointmet = await this.Box.DBLogic.ProxyStatement<DTOBoxEmployInAppointment>();
+                    foreach (var item in a.EmployeesInAppointment)
+                    {
+                        item.RefAppointment = a.ID;
+                        if (!await db_employeesinappointmet.insertAsync(item))
+                        {
+                            return null;
+                        }
+                    }
+                }
+                return a;
+            }
+            return null;
         }
     }
 }

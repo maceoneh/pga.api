@@ -40,6 +40,12 @@ namespace pga.core.DTOsBox
         public const string IdxNumber = TAG + "Number";
         public const string IdxInternalNumber = TAG + "InternalNumber";
 
+        /// <summary>
+        /// Listado de citas asociadas a un expediente
+        /// </summary>
+        [JsonPropertyName("appointments")]
+        public List<DTOBoxAppointment>? AppointmentList { get; internal set; } = null;
+
 
         [Filter(Name = FilterRefReceiver)]
         [Index(Name = IdxRefReceiver)]
@@ -172,6 +178,18 @@ namespace pga.core.DTOsBox
             else
             {
                 f.Intermediary = null;
+            }
+            if (this.AppointmentList != null)
+            {
+                f.AppointmentList = new List<DTOBoxAppointment>(this.AppointmentList.Count);
+                foreach (var item in this.AppointmentList)
+                {
+                    f.AppointmentList.Add(item.CopyTo(new DTOBoxAppointment()));
+                }
+            }
+            else
+            {
+                this.AppointmentList = null;
             }
             return f;
         }

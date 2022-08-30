@@ -14,7 +14,7 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "uuid", Type = ParamType.String)]
         public string UUID { get; set; }
 
-        public List<DTOBoxEmployInAppointment> EmployeesInAppointment { get; set; } = null;
+        public List<DTOBoxEmployInAppointment>? EmployeesInAppointment { get; set; } = null;
 
         [Field(FieldName = "date_from", Type = ParamType.DateTime)]
         public DateTime DateFrom { get; set; }
@@ -40,6 +40,25 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "status", Type = ParamType.Int32)]
         public EBoxAppointmentStatus Status { get; set; } = EBoxAppointmentStatus.InProgress;
 
+        internal DTOBoxAppointment CopyTo(DTOBoxAppointment a)
+        {
+            a.Agreed = this.Agreed;
+            a.DateFrom = this.DateFrom;
+            a.DateTo = this.DateTo;
+            a.Description = this.Description;
+            a.GuildDescription = this.GuildDescription;
+            a.ID = this.ID;
+            a.RefFile = this.RefFile;
+            a.RefReceiver = this.RefReceiver;
+            a.Status = this.Status;
+            a.UUID = this.UUID;
+            a.EmployeesInAppointment = new List<DTOBoxEmployInAppointment>(this.EmployeesInAppointment.Count);
+            foreach (var item in this.EmployeesInAppointment)
+            {
+                a.EmployeesInAppointment.Add(item.CopyTo(new DTOBoxEmployInAppointment()));
+            }
+            return a;
+        }
 
 
         //static private readonly string[] FieldsNotClaim = new string[] {

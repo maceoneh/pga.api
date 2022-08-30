@@ -24,5 +24,17 @@ namespace pga.core.DTOsBox
 
         [Field(FieldName = "leading", Type = ParamType.Boolean, DefaultValue = false)]
         public bool Leading { get; set; } = false;
+
+        internal DTOBoxEmployInAppointment CopyTo(DTOBoxEmployInAppointment e)
+        {
+            e.Leading = this.Leading;
+            e.RefAppointment = this.RefAppointment;
+            e.RefEmploy = this.RefEmploy;
+            if (this.Employ != null)
+            {
+                e.Employ = this.Employ.CopyTo(new DTOBoxSubject());
+            }
+            return e;
+        }
     }
 }
