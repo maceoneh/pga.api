@@ -32,7 +32,7 @@ namespace pga.api.Controllers
                 var filehelper = boxhelper.GetBoxFileHelper();
                 var f = await filehelper.CreateFile(new DTOBoxFile
                 {
-                    Receiver = a.Provider,
+                    Receiver = a.Receiver,
                     Provider = a.Provider,
                     Intermediary = a.Intermediary,
                     Policy = a.Policy,

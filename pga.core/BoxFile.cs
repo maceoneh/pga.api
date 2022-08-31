@@ -182,13 +182,17 @@ namespace pga.core
             var db_appointments = await this.Box.DBLogic.ProxyStatement<DTOBoxAppointment>();
             if (await db_appointments.insertAsync(a))
             {
-                a.ID = db_appointments.lastID;
+                a.ID = db_appointments.lastID;                
                 if (a.EmployeesInAppointment != null)
                 {
                     var db_employeesinappointmet = await this.Box.DBLogic.ProxyStatement<DTOBoxEmployInAppointment>();
                     foreach (var item in a.EmployeesInAppointment)
                     {
                         item.RefAppointment = a.ID;
+                        if (item.Employ != null)
+                        {
+                            item.RefEmploy = item.Employ.ID;
+                        }
                         if (!await db_employeesinappointmet.insertAsync(item))
                         {
                             return null;

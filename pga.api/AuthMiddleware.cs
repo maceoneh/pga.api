@@ -20,7 +20,11 @@ namespace pga.api
                     //Pruebas
                     "start",
                     "/v1/files",
-                    "POST"
+                    "POST",
+                    
+                    "start",
+                    "/v1/appointments",
+                    "POST",
                 };
             }
 
