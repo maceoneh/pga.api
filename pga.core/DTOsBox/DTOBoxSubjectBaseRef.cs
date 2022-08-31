@@ -7,13 +7,13 @@ using System.Xml.Linq;
 
 namespace pga.core.DTOsBox
 {
-    internal abstract class DTOBoxSubjectBaseRef
+    public abstract class DTOBoxSubjectBaseRef
     {
         public const string TAG = "DTOBoxSubjectBaseRef";
         public const string FilterRefSubject = TAG + "RefSubject";
 
         [Filter(Name = FilterRefSubject)]
         [Field(FieldName = "ref_subject", IsPrimaryKey = true, IsAutoincrement = false, Type = ParamType.Int32)]
-        public int RefSubject { get; set; }
+        internal int RefSubject { get; set; }
     }
 }

@@ -43,12 +43,27 @@ namespace pga.core
             return root;
         }
 
-        internal async Task<DTOBoxSubject> GetEmployByPGAMobileUser(string pgamobile_user)
+        /// <summary>
+        /// Obtiene un empleado con el usuario pgamobile indicado
+        /// </summary>
+        /// <param name="pgamobile_user"></param>
+        /// <returns></returns>
+        public async Task<DTOBoxSubject?> GetEmployByPGAMobileUser(string pgamobile_user)
         {
-            var db_subjectroot = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectRoot>();
-            var employ = await db_subjectroot.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions { 
-                
+            var db_subjec = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
+            var employ = await db_subjec.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions {
+                Filters = new List<Filter> {
+                    new Filter { Name = DTOBoxSubjectEmploy.FilterUserPGAMobile, ObjectValue = pgamobile_user, Type = FilterType.Equal }
+                }
             });
+            if (employ != null)
+            {
+                return await this.GetByIDAsync(employ.RefSubject);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         internal async Task<bool> IsRootAsync(DTOBoxSubject s)
@@ -65,7 +80,7 @@ namespace pga.core
         /// <param name="t"></param>
         /// <param name="o">Inicialización del objeto a crear si procede</param>
         /// <returns></returns>
-        internal async Task<bool> AddSubjectToAsync(DTOBoxSubject s, EBoxSubjectType t, DTOBoxSubjectBaseRef o = null)
+        public async Task<bool> AddSubjectToAsync(DTOBoxSubject s, EBoxSubjectType t, DTOBoxSubjectBaseRef o = null)
         {
             if (t == EBoxSubjectType.Root)
             {
@@ -159,6 +174,21 @@ namespace pga.core
                 await db_subjects.insertAsync(s);                
             }
             return s;
+        }
+
+        /// <summary>
+        /// Obtiene un subject por id de la base ded atos
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        private async Task<DTOBoxSubject> GetByIDAsync(int id)
+        {
+            var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
+            return await db_subjects.FirstIfExistsAsync<DTOBoxSubject>(new StatementOptions { 
+                Filters = new List<Filter> { 
+                    new Filter { Name = DTOBoxSubject.FilterID, ObjectValue = id, Type = FilterType.Equal }
+                }
+            });
         }
 
         /// <summary>

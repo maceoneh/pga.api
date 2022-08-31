@@ -2,6 +2,7 @@
 using pga.api.DTOs;
 using pga.core;
 using pga.core.DTOsBox;
+using System.Net;
 
 namespace pga.api.Controllers
 {
@@ -42,8 +43,24 @@ namespace pga.api.Controllers
                     Description = a.Description,
                     Date = a.DateFrom
                 });
-                //Se busca al empleado
-                
+                //Se busca al empleado y si no existe se crea
+                var employ = await subjecthelper.GetEmployByPGAMobileUser(a.PGAMobileUser);
+                if (employ == null)
+                {
+                    //Si el usuario no existe se da de alta
+                    employ = new DTOBoxSubject { 
+                        Name = a.PGAMobileUser                        
+                    };
+                    employ = await subjecthelper.CreateSubjectAsync(employ);
+                    if (!await subjecthelper.AddSubjectToAsync(employ, EBoxSubjectType.Employ, new DTOBoxSubjectEmploy { UserPGAMobile = a.PGAMobileUser }))
+                    {
+                        throw new PGAAPIException { StatusCode = (int)HttpStatusCode.BadRequest, StatusMessage = "Unable to create user " + a.PGAMobileUser };
+                    }
+                }
+                var employees = new List<DTOBoxEmployInAppointment> { new DTOBoxEmployInAppointment { 
+                    Employ = employ,
+                    Leading = true
+                } };
                 //Se crea una cita en el expediente
                 var new_appointment = await filehelper.AddAppointmentAsync(new DTOBoxAppointment
                 {
@@ -52,12 +69,14 @@ namespace pga.api.Controllers
                     DateTo = a.DateFrom.AddHours(1),
                     Description = a.Description,
                     Status = EBoxAppointmentStatus.InProgress,
-                    GuildDescription = a.Guild
+                    GuildDescription = a.Guild,
+                    EmployeesInAppointment = employees
                 }, f); ;
                 if (new_appointment != null)
                 {
                     return new_appointment.UUID;
                 }
+                
             }
             return null;
         }

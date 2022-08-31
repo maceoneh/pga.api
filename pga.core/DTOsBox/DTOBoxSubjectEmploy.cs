@@ -7,7 +7,7 @@ using System.Text;
 namespace pga.core.DTOsBox
 {
     [Table(Name = "subject_employees")]
-    internal class DTOBoxSubjectEmploy : DTOBoxSubjectBaseRef
+    public class DTOBoxSubjectEmploy : DTOBoxSubjectBaseRef
     {
         public const string TAG = "DTOBoxSubjectEmploy";
         public const string FilterUserPGAMobile = TAG + "UserPGAMobile";
