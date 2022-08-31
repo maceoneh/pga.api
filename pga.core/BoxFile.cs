@@ -193,6 +193,10 @@ namespace pga.core
                         {
                             item.RefEmploy = item.Employ.ID;
                         }
+                        else
+                        {
+                            item.RefEmploy = int.MinValue;
+                        }
                         if (!await db_employeesinappointmet.insertAsync(item))
                         {
                             return null;
