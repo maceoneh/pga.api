@@ -15,16 +15,16 @@ namespace pga.api
                     //"POST"
                     "start",
                     "/gwebapi",
-                    "POST",
+                    "POST"
 
                     //Pruebas
-                    "start",
-                    "/v1/files",
-                    "POST",
+                    //"start",
+                    //"/v1/files",
+                    //"POST",
                     
-                    "start",
-                    "/v1/appointments",
-                    "POST",
+                    //"start",
+                    //"/v1/appointments",
+                    //"POST"
                 };
             }
 
@@ -36,6 +36,7 @@ namespace pga.api
                     //Metodo
                     //Tipo de autorizacion
 
+                    //Acceso SUPERADMIN para opererar a nivel de TODOS los buzones
                     "start",
                     "/administration/",
                     "POST",
@@ -54,7 +55,18 @@ namespace pga.api
                     "start",
                     "/administration/",
                     "DELETE",
-                    "BASIC_1"
+                    "BASIC_1",
+
+                    //Acceso a un buzon en concreto
+                    "start",
+                    "/v1/appointments",
+                    "POST",
+                    "BOX_ACCESS_1",
+
+                    "start",
+                    "/v1/files",
+                    "POST",
+                    "BOX_ACCESS_1"
                 };
             }
         }
@@ -90,8 +102,12 @@ namespace pga.api
             var auth_type = GetAuthorizationType(context);
             switch (auth_type)
             {
+                //Autorización para el acceso superadmin para poder opererar con los buzones
                 case "BASIC_1":
                     return await this.CheckBasic1(context);
+                //Autorización para el acceso admin para poder operarar con el buzon al que el usuario tenga acceso
+                case "BOX_ACCESS_1":
+                    return await this.CheckBoxAccess1Async(context);
                 default:
                     return false;
             }
@@ -103,6 +119,40 @@ namespace pga.api
             var admin_user = await mdhelper.GetUserAdminMD5();
             var admin_password = await mdhelper.GetPasswordAdminMD5();
             return admin_user.Equals(context.Request.Headers["_user"]) && admin_password.Equals(context.Request.Headers["_password"]);
+        }
+
+        private async Task<bool> CheckBoxAccess1Async(HttpContext context)
+        {
+            //Se comprueba el tipo de auth enviada
+            switch (context.Items["_auth_type"].ToString().ToUpper())
+            {
+                case "BASIC":
+                    return await this.CheckUserAsync(context);
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Comprueba el usuario y contraseña y agrega al contexto el UUID del box al que debe acceder
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private async Task<bool> CheckUserAsync(HttpContext context)
+        {
+            using (var userhelper = new Users())
+            {
+                var profile = await userhelper.GetProfileAsync(context.Items["_user"].ToString(), context.Items["_password"].ToString());
+                if (profile != null)
+                {
+                    context.Items.Add("_uuid_profile", profile.UUID);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
 
         private async Task<bool> checkBearer(HttpContext context)

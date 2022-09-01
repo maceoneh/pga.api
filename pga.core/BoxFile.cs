@@ -1,6 +1,7 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
 using pga.core.DTOsBox;
+using SQLitePCL;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -84,14 +85,17 @@ namespace pga.core
         /// <param name="f"></param>
         /// <remarks>Falta comprobar permisos</remarks>
         /// <returns></returns>
-        public async Task<DTOBoxFile> CreateFile(DTOBoxFile f)
+        public async Task<DTOBoxFile> CreateFile(DTOBoxFile f, bool check_if_open = true)
         {
             //Comprobar permisos
             this.ValidateCorrectFieldsForCreate(f);
             //Se comprueba si el expediente ya esta abierto
-            if (await this.IsOpenAndLoad(f))
+            if (check_if_open)
             {
-                return f;
+                if (await this.IsOpenAndLoad(f))
+                {
+                    return f;
+                }
             }
             //Se crean las referencias
             //Se crea al receptor del expediente

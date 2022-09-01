@@ -11,8 +11,12 @@ namespace pga.core.DTOs
     {
         public const string TAG = "DTOUserProfile";
         public const string FilterUUID = TAG + "UUID";
+        internal const string FilterRefUser = TAG + "RefUser";
         public const string IdxUUID = TAG + "UUID";
+        internal const string IdxRefUser = TAG + "RefUser";
 
+        [Index(Name = IdxRefUser, Unique = true)]
+        [Filter(Name = FilterRefUser)]
         [Field(FieldName = "ref_user", IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int RefUser { get; set; }
 

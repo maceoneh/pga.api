@@ -11,7 +11,7 @@ namespace pga.api.Controllers
         [HttpPost()]
         public async Task<string> Create([FromBody] DTOBoxFile f)
         {
-            using (var boxhelper = new Box("926d3a3d-09d3-4d68-a3e7-88432aadd7cb"))
+            using (var boxhelper = new Box(this.HttpContext.Items["_uuid_profile"].ToString()))
             {
                 var fileshelper = boxhelper.GetBoxFileHelper();
                 await fileshelper.CreateFile(f);

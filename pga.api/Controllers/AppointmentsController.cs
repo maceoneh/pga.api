@@ -13,7 +13,7 @@ namespace pga.api.Controllers
         [HttpPost()]
         public async Task<string?> CreateAppointment([FromBody] DTORequestCreateAppointment a)
         {
-            using (var boxhelper = new Box("926d3a3d-09d3-4d68-a3e7-88432aadd7cb"))
+            using (var boxhelper = new Box(this.HttpContext.Items["_uuid_profile"].ToString()))
             {                
                 var subjecthelper = boxhelper.GetBoxSubjectHelper();
                 //Se crea al receptor de la intervención
@@ -71,7 +71,7 @@ namespace pga.api.Controllers
                     Status = EBoxAppointmentStatus.InProgress,
                     GuildDescription = a.Guild,
                     EmployeesInAppointment = employees
-                }, f); ;
+                }, f);
                 if (new_appointment != null)
                 {
                     return new_appointment.UUID;

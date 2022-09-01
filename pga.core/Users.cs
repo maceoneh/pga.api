@@ -4,6 +4,7 @@ using pga.core.DTOs;
 using pga.core.Exceptions;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -54,11 +55,50 @@ namespace pga.core
             return await db_profiles.selectAsync<DTOUserProfile>();
         }
 
+        /// <summary>
+        /// Obtiene los datos de un profile a partir de su usuario y contraseña
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="password"></param>
+        /// <returns></returns>
+        public async Task<DTOUserProfile?> GetProfileAsync(string user, string password)
+        {
+            var db_users = await this.DBLogic.ProxyStatement<DTOUser>();
+            var user_in_db = await db_users.FirstIfExistsAsync<DTOUser>(new StatementOptions
+            {
+                Filters = new List<Filter> {
+                    new Filter { Name = DTOUser.FilterUserMD5, ObjectValue = user, Type = FilterType.Equal }
+                }
+            });
+            if (user_in_db == null)
+            {
+                return null;
+            }
+            else
+            {
+                if (user_in_db.PasswordMD5 == password)
+                {
+                    var db_profiles = await this.DBLogic.ProxyStatement<DTOUserProfile>();
+                    return await db_profiles.FirstIfExistsAsync<DTOUserProfile>(new StatementOptions
+                    {
+                        Filters = new List<Filter> {
+                            new Filter { Name = DTOUserProfile.FilterRefUser, ObjectValue = user_in_db.ID, Type = FilterType.Equal }
+                        }
+                    });
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         public async Task<DTOUserProfile> GetProfile(string uuid)
         {
             var db_profiles = await this.DBLogic.ProxyStatement<DTOUserProfile>();
-            var profile_in_db = await db_profiles.FirstIfExistsAsync<DTOUserProfile>(new StatementOptions { 
-                Filters = new List<Filter> { 
+            var profile_in_db = await db_profiles.FirstIfExistsAsync<DTOUserProfile>(new StatementOptions
+            {
+                Filters = new List<Filter> {
                     new Filter { Name = DTOUserProfile.FilterUUID, ObjectValue = uuid, Type = FilterType.Equal }
                 }
             });
@@ -76,8 +116,9 @@ namespace pga.core
         {
             //Se busca el profile en la BD
             var db_profiles = await this.DBLogic.ProxyStatement<DTOUserProfile>();
-            var profile_in_db = await db_profiles.FirstIfExistsAsync<DTOUserProfile>(new StatementOptions { 
-                Filters = new List<Filter> { 
+            var profile_in_db = await db_profiles.FirstIfExistsAsync<DTOUserProfile>(new StatementOptions
+            {
+                Filters = new List<Filter> {
                     new Filter { Name = DTOUserProfile.FilterUUID, ObjectValue = p.UUID, Type = FilterType.Equal }
                 }
             });
@@ -116,14 +157,15 @@ namespace pga.core
             {
                 //Se obtiene el usuario asociado
                 var db_users = await this.DBLogic.ProxyStatement<DTOUser>();
-                var user_in_db = await db_users.FirstIfExistsAsync<DTOUser>(new StatementOptions { 
-                    Filters = new List<Filter> { 
+                var user_in_db = await db_users.FirstIfExistsAsync<DTOUser>(new StatementOptions
+                {
+                    Filters = new List<Filter> {
                         new Filter { Name = DTOUser.FilterID, ObjectValue = profile_in_db.RefUser, Type = FilterType.Equal }
                     }
                 });
                 var transaction_id = new object();
                 try
-                {                    
+                {
                     db_profiles.beginTransaction(transaction_id);
                     if (user_in_db != null)
                     {
@@ -146,7 +188,7 @@ namespace pga.core
                     db_profiles.refuseTransaction(transaction_id);
                 }
                 return true;
-            }            
+            }
         }
     }
 }
