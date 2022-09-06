@@ -10,6 +10,7 @@ namespace pga.core.DTOsBox
     public class DTOBoxActivity
     {
         public const string TAG = "DTOBoxActivity";
+        public const string FilterID = TAG + "ID";
         public const string FilterRefFile = TAG + "RefFile";
         public const string FilterRefAppointment = TAG + "RefAppointment";
         public const string FilterIdentifier = TAG + "Identifier";
@@ -42,9 +43,9 @@ namespace pga.core.DTOsBox
         public EBoxActivityType Type { get; set; }
 
         [Field(FieldName = "activity", Type = ParamType.String)]
-        public string Activity { get; set; }
+        public string? Activity { get; set; }
 
-        public string VirtualActivity { get; set; }
+        public string? VirtualActivity { get; set; }
 
         /// <summary>
         /// Si el tamaño de la actividad es extendido se guardara en un fichero de texto

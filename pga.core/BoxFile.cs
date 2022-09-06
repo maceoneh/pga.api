@@ -85,7 +85,7 @@ namespace pga.core
         /// <param name="f"></param>
         /// <remarks>Falta comprobar permisos</remarks>
         /// <returns></returns>
-        public async Task<DTOBoxFile> CreateFile(DTOBoxFile f, bool check_if_open = true)
+        public async Task<DTOBoxFile?> CreateFile(DTOBoxFile f, bool check_if_open = true)
         {
             //Comprobar permisos
             this.ValidateCorrectFieldsForCreate(f);
@@ -145,6 +145,13 @@ namespace pga.core
             if (await db_file.insertAsync(f))
             {
                 f.ID = db_file.lastID;
+                await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity
+                {
+                    Flow = EBoxActivityFlow.In,
+                    RefAppointment = f.ID,
+                    Type = EBoxActivityType.CreateAppointment,
+                    Activity = ""
+                });
                 return f;
             }
             else

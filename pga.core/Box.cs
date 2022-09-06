@@ -14,13 +14,31 @@ namespace pga.core
 {
     public class Box : IDisposable
     {
+        /// <summary>
+        /// Buzones con la estructura actualizada
+        /// </summary>
+        static private List<string> BoxesBuilded { get; } = new List<string>();
+
+        /// <summary>
+        /// Buzones con la base de datos actualizada
+        /// </summary>
+        static private List<string> BoxesUpdatedDB { get; } = new List<string>();
+
         public string UUID { get; private set; }
 
         public string AccessToken { get; private set; }
 
         internal DTOBoxSubject Subject { get; private set; } = null;
 
+        /// <summary>
+        /// Ruta al directorio raiz del box
+        /// </summary>
         internal string DataPath { get => Init.BoxesPath + @"\" + this.UUID; }
+
+        /// <summary>
+        /// Ruta al directorio donde se guarara la información adicional de las actividades
+        /// </summary>
+        internal string ActivityPath { get => DataPath + @"\data\activity"; }
 
         internal ConnectionParameters ConnectionParameters
         {
@@ -79,7 +97,11 @@ namespace pga.core
                 {
                     throw new ArgumentException("UUID can't be empty");
                 }
-                this.BuildIfNecessary();
+                if (!BoxesBuilded.Contains(this.UUID))
+                {
+                    this.BuildIfNecessary();
+                    BoxesBuilded.Add(this.UUID);
+                }
                 this._db_logic = new DataBaseLogic(new ConnectionParameters
                 {
                     File = this.DataPath + @"\data.db",
@@ -96,12 +118,33 @@ namespace pga.core
             {
                 Directory.CreateDirectory(path);
             }
+            //Se crea el fichero de versiones
             if (!File.Exists(path + @"\version.json"))
             {
                 using (var filehelper = new TextPlainFile(path + @"\version.json"))
                 {
                     filehelper.set(JSon.serializeJSON<DTOBoxVersion>(new DTOBoxVersion { VersionToken = "0", LastUpdateDatabase = DateTime.Now }));
                 }
+            }
+            //Se crean los subdirectorios de ficheros
+            var data = path + @"\data\";
+            if (!Directory.Exists(data))
+            {
+                Directory.CreateDirectory(data);
+            }
+            var data_activity = data + "activity";
+            if (!Directory.Exists(data_activity))
+            {
+                Directory.CreateDirectory(data_activity);
+            }
+        }
+
+        public async Task CreateUpdateDatabaseIfNecessaryAsync()
+        {
+            if (!BoxesUpdatedDB.Contains(this.UUID))
+            {
+                await this.CreateUpdateDatabase();
+                BoxesUpdatedDB.Add(this.UUID);
             }
         }
 
@@ -166,6 +209,11 @@ namespace pga.core
         public BoxCounters GetBoxCountersHelper()
         {
             return new BoxCounters(this);
+        }
+
+        public BoxActivity GetBoxActivityHelper()
+        {
+            return new BoxActivity(this);
         }
 
         protected virtual void Dispose(bool disposing)

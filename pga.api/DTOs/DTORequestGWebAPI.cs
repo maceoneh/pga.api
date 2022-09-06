@@ -1,18 +1,17 @@
 ﻿using es.dmoreno.utils.api;
-using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace pga.api.DTOs
 {
-    [DataContract]
     public class DTORequestGWebAPI<T> : DTORequest<T>
     {
-        [DataMember(Name = "aktype")]
+        [JsonPropertyName("aktype")]
         public string AKType { get; set; }
 
-        [DataMember(Name = "provider")]
+        [JsonPropertyName("provider")]
         public string Provider { get; set; }
 
-        [DataMember(Name = "action")]
+        [JsonPropertyName("action")]
         public string Action { get; set; }
     }
 }

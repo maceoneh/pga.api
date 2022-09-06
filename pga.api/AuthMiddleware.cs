@@ -146,6 +146,10 @@ namespace pga.api
                 if (profile != null)
                 {
                     context.Items.Add("_uuid_profile", profile.UUID);
+                    using (var boxhelper = new Box(profile.UUID))
+                    {
+                        await boxhelper.CreateUpdateDatabaseIfNecessaryAsync();
+                    }
                     return true;
                 }
                 else

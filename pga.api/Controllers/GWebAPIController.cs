@@ -3,15 +3,18 @@ using es.dmoreno.utils.security;
 using es.dmoreno.utils.serialize;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.IIS.Core;
-using Newtonsoft.Json;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using pga.api.DTOs;
 using pga.core;
 using pga.core.DTOs;
+using System.Buffers;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Xml.Linq;
 
 namespace pga.api.Controllers
 {
@@ -37,6 +40,7 @@ namespace pga.api.Controllers
 
         private async Task<object> Process(DTORequestGWebAPI<Object> request)
         {
+            var type = request.Parameters.GetType();
             //Se inicia un cronometro
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -79,22 +83,29 @@ namespace pga.api.Controllers
             //Se comprueba la accion
             switch (request.Action.ToUpper())
             {
-                case "GETTOKEN":                    
-                    var credentials = JSon.JObjectToType<DTORequestGWebAPIGetToken>(request.Parameters as JObject);
-                    response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));                    
+                case "GETTOKEN":
+                    var credentials = (JsonElement)request.Parameters;
+                    var c = credentials.Deserialize<DTORequestGWebAPIGetToken>();
+                        //var credentials = JSon.JObjectToType<DTORequestGWebAPIGetToken>(request.Parameters as JObject);
+                    //var credentials = request.Parameters as JsonElement;
+                    //response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));
                     break;
-                //Funciones para el administrador
-                case "CREATESESSION":
-                    var infotoken = JSon.JObjectToType<DTORequestGWebAPICreateSession>(request.Parameters as JObject);
-                    response.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
-                    break;
-                case "REMOVESESSION":
-                    var inforemovetoken = JSon.JObjectToType<DTORequestGWebAPIRemoveSession>(request.Parameters as JObject);
-                    response.Response = await this.RemoveSession(request.Provider, request.Token, inforemovetoken);
-                    break;
-                case "REFRESHTOKEN":
-                    response.Response = true;
-                    break;
+                ////Funciones para el administrador
+                //case "CREATESESSION":
+                //    var infotoken = JSon.JObjectToType<DTORequestGWebAPICreateSession>(request.Parameters as JObject);
+                //    response.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
+                //    break;
+                //case "REMOVESESSION":
+                //    var inforemovetoken = JSon.JObjectToType<DTORequestGWebAPIRemoveSession>(request.Parameters as JObject);
+                //    response.Response = await this.RemoveSession(request.Provider, request.Token, inforemovetoken);
+                //    break;
+                //case "REFRESHTOKEN":
+                //    response.Response = true;
+                //    break;
+                ////Funciones para PGAMobile
+                //case "GETSTATUS":
+
+                //    break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
             }

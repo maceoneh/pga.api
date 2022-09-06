@@ -1,14 +1,14 @@
 ﻿using System.Runtime.Serialization;
+using System.Text.Json.Serialization;
 
 namespace pga.api.DTOs
 {
-    [DataContract]
     public class DTORequestGWebAPIGetToken
     {
-        [DataMember(Name = "user")]
+        [JsonPropertyName("user")]
         public string Username { get; set; }
 
-        [DataMember(Name = "password")]
+        [JsonPropertyName("password")]
         public string Password { get; set; }
     }
 }
