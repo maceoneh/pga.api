@@ -146,12 +146,12 @@ namespace pga.core
             if (await db_file.insertAsync(f))
             {
                 f.ID = db_file.lastID;
-                await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity
+                await this.Box.GetBoxMessageHelper().AddAsync(new DTOBoxMessage
                 {
-                    Flow = EBoxActivityFlow.In,
+                    Flow = EBoxMessageFlow.In,
                     RefFile = f.ID,
-                    Type = EBoxActivityType.CreateAppointment,
-                    Activity = ""
+                    Type = EBoxMessageType.CreateAppointment,
+                    Message = ""
                 });
                 return f;
             }
@@ -217,12 +217,12 @@ namespace pga.core
                         else
                         {
                             //Se guarda la actividad
-                            await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity
+                            await this.Box.GetBoxMessageHelper().AddAsync(new DTOBoxMessage
                             {
                                 RefFile = f.ID,
                                 RefAppointment = a.ID,
-                                Flow = EBoxActivityFlow.In,
-                                Type = EBoxActivityType.CreateAppointment
+                                Flow = EBoxMessageFlow.In,
+                                Type = EBoxMessageType.CreateAppointment
                             });
                         }
                     }
@@ -276,11 +276,11 @@ namespace pga.core
         /// <returns></returns>
         public async Task<bool> AddStatusDownloadedAsync(DTOBoxAppointment a)
         {
-            return await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity { 
-                Flow = EBoxActivityFlow.In,
+            return await this.Box.GetBoxMessageHelper().AddAsync(new DTOBoxMessage { 
+                Flow = EBoxMessageFlow.In,
                 RefAppointment = a.ID,
                 RefFile = a.RefFile,
-                Type = EBoxActivityType.DownloadedAppointment
+                Type = EBoxMessageType.DownloadedAppointment
             });
         }
     }

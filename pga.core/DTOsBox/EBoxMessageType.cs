@@ -7,7 +7,7 @@ namespace pga.core.DTOsBox
     /// <summary>
     /// Indica el tipo de actividad ocurrida
     /// </summary>
-    public enum EBoxActivityType
+    public enum EBoxMessageType
     {
         CreateFile = 0,
         DeleteFile = 1,

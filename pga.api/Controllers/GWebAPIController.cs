@@ -175,7 +175,7 @@ namespace pga.api.Controllers
         {
             using (var boxhelper = new Box(uuid_provider))
             {
-                return await boxhelper.GetBoxActivityHelper().GetLastIdentifierByDocumentAsync(EBoxDocumentType.Appointment, id);
+                return await boxhelper.GetBoxMessageHelper().GetLastIdentifierByDocumentAsync(EBoxDocumentType.Appointment, id);
             }
         }
 

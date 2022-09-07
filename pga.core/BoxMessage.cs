@@ -11,11 +11,11 @@ using System.Threading.Tasks;
 
 namespace pga.core
 {
-    public class BoxActivity
+    public class BoxMessage
     {
         private Box Box { get; }
 
-        internal BoxActivity(Box b)
+        internal BoxMessage(Box b)
         {
             this.Box = b;
         }
@@ -25,21 +25,21 @@ namespace pga.core
         /// </summary>
         /// <param name="a"></param>
         /// <returns></returns>
-        internal async Task<bool> AddAsync(DTOBoxActivity a)
+        internal async Task<bool> AddAsync(DTOBoxMessage a)
         {
             string? aux = null;
             a.Date = DateTime.Now;
             a.Identifier = Token.generate(new ConfigToken { Length = 20, Letters = true, Numbers = true });
-            if (a.Activity != null)
+            if (a.Message != null)
             {
-                if (a.Activity.Length > 2500)
+                if (a.Message.Length > 2500)
                 {
-                    aux = a.Activity;
-                    a.Activity = null;
+                    aux = a.Message;
+                    a.Message = null;
 
                 }
             }
-            var db_activity = await this.Box.DBLogic.ProxyStatement<DTOBoxActivity>();
+            var db_activity = await this.Box.DBLogic.ProxyStatement<DTOBoxMessage>();
             if (await db_activity.insertAsync(a))
             {
                 if (aux != null)
@@ -65,13 +65,13 @@ namespace pga.core
         /// </summary>
         /// <param name="identifier"></param>
         /// <returns></returns>
-        public async Task<List<DTOBoxActivity>?> GetListFromIdentifierAsync(string identifier, EBoxDocumentType type)
+        public async Task<List<DTOBoxMessage>?> GetListFromIdentifierAsync(string identifier, EBoxDocumentType type)
         {
-            var db_activity = await this.Box.DBLogic.ProxyStatement<DTOBoxActivity>();
-            var first_activity = await db_activity.FirstIfExistsAsync<DTOBoxActivity>(new StatementOptions
+            var db_activity = await this.Box.DBLogic.ProxyStatement<DTOBoxMessage>();
+            var first_activity = await db_activity.FirstIfExistsAsync<DTOBoxMessage>(new StatementOptions
             {
                 Filters = new List<Filter> {
-                    new Filter { Name = DTOBoxActivity.FilterIdentifier, ObjectValue = identifier, Type = FilterType.Equal }
+                    new Filter { Name = DTOBoxMessage.FilterIdentifier, ObjectValue = identifier, Type = FilterType.Equal }
                 }
             });
             if (first_activity == null)
@@ -81,14 +81,14 @@ namespace pga.core
             else
             {
                 var filters = new List<Filter> {
-                    new Filter { Name = DTOBoxActivity.FilterID, ObjectValue = first_activity.ID, Type = FilterType.Greater }
+                    new Filter { Name = DTOBoxMessage.FilterID, ObjectValue = first_activity.ID, Type = FilterType.Greater }
                 };
 
                 if (type == EBoxDocumentType.File)
                 {
                     if (first_activity.RefFile > 0)
                     {
-                        filters.Add(new Filter { Name = DTOBoxActivity.FilterRefFile, ObjectValue = first_activity.RefFile, Type = FilterType.Equal });
+                        filters.Add(new Filter { Name = DTOBoxMessage.FilterRefFile, ObjectValue = first_activity.RefFile, Type = FilterType.Equal });
                     }
                     else
                     {
@@ -99,7 +99,7 @@ namespace pga.core
                 {
                     if (first_activity.RefAppointment > 0)
                     {
-                        filters.Add(new Filter { Name = DTOBoxActivity.FilterRefAppointment, ObjectValue = first_activity.RefFile, Type = FilterType.Equal });
+                        filters.Add(new Filter { Name = DTOBoxMessage.FilterRefAppointment, ObjectValue = first_activity.RefFile, Type = FilterType.Equal });
                     }
                     else
                     {
@@ -107,9 +107,9 @@ namespace pga.core
                     }
                 }
 
-                var list = new List<DTOBoxActivity>();
+                var list = new List<DTOBoxMessage>();
                 list.Add(first_activity);
-                list.AddRange(await db_activity.selectAsync<DTOBoxActivity>(new StatementOptions { Filters = filters }));
+                list.AddRange(await db_activity.selectAsync<DTOBoxMessage>(new StatementOptions { Filters = filters }));
                 return list.OrderBy(reg => reg.Date).ToList();
             }
         }
@@ -120,16 +120,16 @@ namespace pga.core
             switch (type)
             {
                 case EBoxDocumentType.Appointment:
-                    filter = DTOBoxActivity.FilterRefAppointment;
+                    filter = DTOBoxMessage.FilterRefAppointment;
                     break;
                 case EBoxDocumentType.File:
-                    filter = DTOBoxActivity.FilterRefFile;
+                    filter = DTOBoxMessage.FilterRefFile;
                     break;
                 default:
                     throw new NotImplementedException();
             }
-            var db_activity = await this.Box.DBLogic.ProxyStatement<DTOBoxActivity>();
-            var first_activity = await db_activity.FirstIfExistsAsync<DTOBoxActivity>(new StatementOptions
+            var db_activity = await this.Box.DBLogic.ProxyStatement<DTOBoxMessage>();
+            var first_activity = await db_activity.FirstIfExistsAsync<DTOBoxMessage>(new StatementOptions
             {
                 Filters = new List<Filter> {
                     new Filter { Name = filter, ObjectValue = idregistry, Type = FilterType.Equal }
