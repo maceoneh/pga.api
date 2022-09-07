@@ -135,6 +135,15 @@ namespace pga.api.Controllers
                     }
                     break;
                 case "SETWORKORDERSTATE":
+                    var infoworkorderstate = parameters.Deserialize<DTORequestGWebAPIWorkOrderState>();
+                    if (infoworkorderstate != null)
+                    {
+                        response.Response = await this.SetWorkOrderStatus(request.Provider, infoworkorderstate);
+                    }
+                    else
+                    {
+                        response.Response = false;
+                    }
                     break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
@@ -145,11 +154,28 @@ namespace pga.api.Controllers
             return response;
         }
 
+        private async Task<bool> SetWorkOrderStatus(string uuid_provider, DTORequestGWebAPIWorkOrderState s)
+        {
+            using (var boxhelper = new Box(uuid_provider))
+            {
+                var filehelper = boxhelper.GetBoxFileHelper();
+                var appointment = await filehelper.GetAppointmentByExternalIDAsync(s.IDMasterDetail);
+                if (appointment != null) 
+                {
+                    return await filehelper.AddStatusDownloadedAsync(appointment);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
         private async Task<string?> GetStatus(string uuid_provider, int doctype, int id)
         {
             using (var boxhelper = new Box(uuid_provider))
             {
-                return await boxhelper.GetBoxActivityHelper().GetLastIdentifierByDocument(EBoxDocumentType.Appointment, id);
+                return await boxhelper.GetBoxActivityHelper().GetLastIdentifierByDocumentAsync(EBoxDocumentType.Appointment, id);
             }
         }
 

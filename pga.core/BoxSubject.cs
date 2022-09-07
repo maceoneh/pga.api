@@ -181,7 +181,7 @@ namespace pga.core
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private async Task<DTOBoxSubject> GetByIDAsync(int id)
+        internal async Task<DTOBoxSubject> GetByIDAsync(int id)
         {
             var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
             return await db_subjects.FirstIfExistsAsync<DTOBoxSubject>(new StatementOptions { 

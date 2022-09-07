@@ -59,12 +59,13 @@ namespace pga.core
             }
         }
 
+
         /// <summary>
         /// Obtiene a raiz de un identificador los siguientes registros de actividad relacionados con el identificvador indicado
         /// </summary>
         /// <param name="identifier"></param>
         /// <returns></returns>
-        public async Task<List<DTOBoxActivity>?> GetListFromIdentifier(string identifier, EBoxDocumentType type)
+        public async Task<List<DTOBoxActivity>?> GetListFromIdentifierAsync(string identifier, EBoxDocumentType type)
         {
             var db_activity = await this.Box.DBLogic.ProxyStatement<DTOBoxActivity>();
             var first_activity = await db_activity.FirstIfExistsAsync<DTOBoxActivity>(new StatementOptions
@@ -113,7 +114,7 @@ namespace pga.core
             }
         }
 
-        public async Task<string?> GetLastIdentifierByDocument(EBoxDocumentType type, int idregistry)
+        public async Task<string?> GetLastIdentifierByDocumentAsync(EBoxDocumentType type, int idregistry)
         {
             string? filter;
             switch (type)

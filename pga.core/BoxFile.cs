@@ -54,7 +54,7 @@ namespace pga.core
                     return false;
                 }
                 //Se comprueba si existe un expediente con el mismo numero, receptor, proveedor e interviniente y esta abierto
-                var filters = new List<Filter> { 
+                var filters = new List<Filter> {
                     new Filter { Name = DTOBoxFile.FilterNumber, ObjectValue = f.Number, Type = FilterType.Equal },
                     new Filter { Name = DTOBoxFile.FilterRefReceiver, ObjectValue = f.Receiver.ID, Type = FilterType.Equal},
                     new Filter { Name = DTOBoxFile.FilterStatus, ObjectValue = EBoxFileStatus.InProgress, Type = FilterType.Equal}
@@ -95,7 +95,7 @@ namespace pga.core
             {
                 if (await this.IsOpenAndLoad(f))
                 {
-                     return f;
+                    return f;
                 }
             }
             //Se crean las referencias
@@ -108,7 +108,7 @@ namespace pga.core
             f.RefReceiver = f.Receiver.ID;
             //Se crea el proveedor si fuera necesario
             if (f.Provider != null)
-            {                
+            {
                 if (!(await subjectshelper.ExistsAndLoadAsync(f.Provider)))
                 {
                     f.Provider = await subjectshelper.CreateSubjectAsync(f.Provider);
@@ -121,7 +121,7 @@ namespace pga.core
             }
             //Se crea el intermediario si fuera necesario
             if (f.Intermediary != null)
-            {                
+            {
                 if (!(await subjectshelper.ExistsAndLoadAsync(f.Intermediary)))
                 {
                     f.Intermediary = await subjectshelper.CreateSubjectAsync(f.Intermediary);
@@ -131,7 +131,7 @@ namespace pga.core
             else
             {
                 f.RefIntermediary = int.MinValue;
-            }            
+            }
             //Se rellenan algunos datos
             if (f.Date.Ticks == 0)
             {
@@ -175,7 +175,7 @@ namespace pga.core
             if (f.Receiver == null)
             {
                 throw new ArgumentException("Receiver can't be NULL");
-            }            
+            }
         }
 
         /// <summary>
@@ -195,7 +195,7 @@ namespace pga.core
             var db_appointments = await this.Box.DBLogic.ProxyStatement<DTOBoxAppointment>();
             if (await db_appointments.insertAsync(a))
             {
-                a.ID = db_appointments.lastID;                
+                a.ID = db_appointments.lastID;
                 if (a.EmployeesInAppointment != null)
                 {
                     var db_employeesinappointmet = await this.Box.DBLogic.ProxyStatement<DTOBoxEmployInAppointment>();
@@ -217,7 +217,8 @@ namespace pga.core
                         else
                         {
                             //Se guarda la actividad
-                            await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity { 
+                            await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity
+                            {
                                 RefFile = f.ID,
                                 RefAppointment = a.ID,
                                 Flow = EBoxActivityFlow.In,
@@ -229,6 +230,58 @@ namespace pga.core
                 return a;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Obtiene una cita desde un Id externo
+        /// </summary>
+        /// <param name="external_id"></param>
+        /// <returns></returns>
+        public async Task<DTOBoxAppointment?> GetAppointmentByExternalIDAsync(int external_id)
+        {
+            var db_appointment = await this.Box.DBLogic.ProxyStatement<DTOBoxAppointment>();
+            var appointment = await db_appointment.FirstIfExistsAsync<DTOBoxAppointment>(new StatementOptions
+            {
+                Filters = new List<Filter> {
+                    new Filter { Name = DTOBoxAppointment.FilterExternalID, ObjectValue = external_id, Type = FilterType.Equal }
+                }
+            });
+            if (appointment != null)
+            {
+                var db_appointment_employess = await this.Box.DBLogic.ProxyStatement<DTOBoxEmployInAppointment>();
+                var employees_in_appointment = await db_appointment_employess.selectAsync<DTOBoxEmployInAppointment>(new StatementOptions
+                {
+                    Filters = new List<Filter>
+                    {
+                        new Filter { Name = DTOBoxEmployInAppointment.FilterRefAppointment, ObjectValue = appointment.ID, Type = FilterType.Equal }
+                    }
+                });
+                if (employees_in_appointment != null)
+                {
+                    var subjecthelper = this.Box.GetBoxSubjectHelper();
+                    foreach (var item in employees_in_appointment)
+                    {
+                        item.Employ = await subjecthelper.GetByIDAsync(item.RefEmploy);
+                    }
+                    appointment.EmployeesInAppointment = employees_in_appointment;
+                }
+            }
+            return appointment;
+        }
+
+        /// <summary>
+        /// Asocia una actividad de cita descargada a la cita pasada por parámetro
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
+        public async Task<bool> AddStatusDownloadedAsync(DTOBoxAppointment a)
+        {
+            return await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity { 
+                Flow = EBoxActivityFlow.In,
+                RefAppointment = a.ID,
+                RefFile = a.RefFile,
+                Type = EBoxActivityType.DownloadedAppointment
+            });
         }
     }
 }

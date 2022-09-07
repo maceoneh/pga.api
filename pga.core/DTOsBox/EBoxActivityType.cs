@@ -14,6 +14,7 @@ namespace pga.core.DTOsBox
         ModifyFile = 2,
         CreateAppointment = 3,
         DeleteAppointment = 4,
-        ModifyAppointment = 5
+        ModifyAppointment = 5,
+        DownloadedAppointment = 6
     }
 }
