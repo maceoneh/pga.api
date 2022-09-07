@@ -1,15 +1,13 @@
-﻿using System.Runtime.Serialization;
-using System.Xml.Linq;
+﻿using System.Text.Json.Serialization;
 
 namespace pga.api.DTOs
 {
-    [DataContract]
     public class DTORequestGWebAPIRemoveSession
     {
-        [DataMember(Name = "appkey")]
+        [JsonPropertyName("appkey")]
         public string ApplicationKey { get; set; }
 
-        [DataMember(Name = "oldtoken")]
+        [JsonPropertyName("oldtoken")]
         public string OldToken { get; set; }
     }
 }

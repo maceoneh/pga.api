@@ -24,12 +24,12 @@ namespace pga.core.DTOsBox
         [Filter(Name = FilterRefFile)]
         [Index(Name = IdxRefFile)]
         [Field(FieldName = "ref_file", Type = ParamType.Int32, DefaultValue = int.MinValue)]
-        internal int RefFile { get; set; }
+        internal int RefFile { get; set; } = int.MinValue;
 
         [Filter(Name = FilterRefAppointment)]
         [Index(Name = IdxRefAppointment)]
         [Field(FieldName = "ref_appointment", Type = ParamType.Int32, DefaultValue = int.MinValue)]
-        internal int RefAppointment { get; set; }
+        internal int RefAppointment { get; set; } = int.MinValue;
 
         [Filter(Name = FilterIdentifier)]
         [Index(Name = IdxIdentifier, Unique = true)]

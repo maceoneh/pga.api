@@ -1,5 +1,6 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
+using es.dmoreno.utils.security;
 using pga.core.DTOsBox;
 using SQLitePCL;
 using System;
@@ -94,7 +95,7 @@ namespace pga.core
             {
                 if (await this.IsOpenAndLoad(f))
                 {
-                    return f;
+                     return f;
                 }
             }
             //Se crean las referencias
@@ -148,7 +149,7 @@ namespace pga.core
                 await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity
                 {
                     Flow = EBoxActivityFlow.In,
-                    RefAppointment = f.ID,
+                    RefFile = f.ID,
                     Type = EBoxActivityType.CreateAppointment,
                     Activity = ""
                 });
@@ -187,6 +188,7 @@ namespace pga.core
         {
             //Se completa información
             a.UUID = Guid.NewGuid().ToString();
+            a.ExternalID = Token.getRandomNumber();
             a.RefFile = f.ID;
             a.RefReceiver = f.RefReceiver;
             //Se agregan registros en la base de datos
@@ -211,6 +213,16 @@ namespace pga.core
                         if (!await db_employeesinappointmet.insertAsync(item))
                         {
                             return null;
+                        }
+                        else
+                        {
+                            //Se guarda la actividad
+                            await this.Box.GetBoxActivityHelper().AddAsync(new DTOBoxActivity { 
+                                RefFile = f.ID,
+                                RefAppointment = a.ID,
+                                Flow = EBoxActivityFlow.In,
+                                Type = EBoxActivityType.CreateAppointment
+                            });
                         }
                     }
                 }

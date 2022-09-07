@@ -1,4 +1,5 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
+using es.dmoreno.utils.dataaccess.filters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,11 +9,20 @@ namespace pga.core.DTOsBox
     [Table(Name = "appointments", FilePerTable = true)]
     public class DTOBoxAppointment
     {
+        public const string TAG = "DTOBoxAppointment";
+        public const string FilterExternalID = TAG + "ExternalID";
+        public const string IdxExternalID = TAG + "ExternalID";
+
         [Field(FieldName = "id", IsPrimaryKey = true, IsAutoincrement = true, Type = ParamType.Int32)]
         internal int ID { get; set; }
 
         [Field(FieldName = "uuid", Type = ParamType.String)]
         public string UUID { get; set; }
+
+        [Filter(Name = FilterExternalID)]
+        [Index(Name = IdxExternalID, Unique = true)]
+        [Field(FieldName = "external_id", Type = ParamType.Int32)]
+        internal int ExternalID { get; set; }
 
         public List<DTOBoxEmployInAppointment>? EmployeesInAppointment { get; set; } = null;
 

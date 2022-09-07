@@ -8,6 +8,7 @@ using Newtonsoft.Json.Linq;
 using pga.api.DTOs;
 using pga.core;
 using pga.core.DTOs;
+using pga.core.DTOsBox;
 using System.Buffers;
 using System.Diagnostics;
 using System.Linq;
@@ -22,14 +23,14 @@ namespace pga.api.Controllers
     [Route("gwebapi")]
     public class GWebAPIController : Controller
     {
-        private static readonly string[] ActionWithoutTokenValidation = new string[] { 
+        private static readonly string[] ActionWithoutTokenValidation = new string[] {
             "GETTOKEN"
         };
 
         [HttpPost()]
         public async Task<Object> ProcessPost([FromBody] DTORequestGWebAPI<Object> o)
         {
-            return await this.Process(o);                        
+            return await this.Process(o);
         }
 
         [HttpGet("sample_error")]
@@ -40,7 +41,7 @@ namespace pga.api.Controllers
 
         private async Task<object> Process(DTORequestGWebAPI<Object> request)
         {
-            var type = request.Parameters.GetType();
+            //var type = request.Parameters.GetType();
             //Se inicia un cronometro
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -52,10 +53,11 @@ namespace pga.api.Controllers
             //Se comprueba si la base de datos esta actualizada
             using (var boxhelper = new Box(request.Provider))
             {
-                await boxhelper.CreateUpdateDatabase();                
+                await boxhelper.CreateUpdateDatabase();
             }
             //Se genera paquete de respuesta
-            var response = new DTOResponseGWebAPI<Object> { 
+            var response = new DTOResponseGWebAPI<Object>
+            {
                 AKType = "response",
                 Debug = false,
                 Error = null,
@@ -81,31 +83,59 @@ namespace pga.api.Controllers
                 }
             }
             //Se comprueba la accion
+            var parameters = (JsonElement)request.Parameters;
             switch (request.Action.ToUpper())
             {
-                case "GETTOKEN":
-                    var credentials = (JsonElement)request.Parameters;
-                    var c = credentials.Deserialize<DTORequestGWebAPIGetToken>();
-                        //var credentials = JSon.JObjectToType<DTORequestGWebAPIGetToken>(request.Parameters as JObject);
-                    //var credentials = request.Parameters as JsonElement;
-                    //response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));
+                case "GETTOKEN":                    
+                    var credentials = parameters.Deserialize<DTORequestGWebAPIGetToken>();
+                    if (credentials != null)
+                    {
+                        response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));
+                    }
                     break;
-                ////Funciones para el administrador
-                //case "CREATESESSION":
-                //    var infotoken = JSon.JObjectToType<DTORequestGWebAPICreateSession>(request.Parameters as JObject);
-                //    response.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
-                //    break;
-                //case "REMOVESESSION":
-                //    var inforemovetoken = JSon.JObjectToType<DTORequestGWebAPIRemoveSession>(request.Parameters as JObject);
-                //    response.Response = await this.RemoveSession(request.Provider, request.Token, inforemovetoken);
-                //    break;
-                //case "REFRESHTOKEN":
-                //    response.Response = true;
-                //    break;
-                ////Funciones para PGAMobile
-                //case "GETSTATUS":
-
-                //    break;
+                //Funciones para el administrador
+                case "CREATESESSION":
+                    var infotoken = parameters.Deserialize<DTORequestGWebAPICreateSession>();
+                    if (infotoken != null)
+                    {
+                        response.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
+                    }
+                    else
+                    {
+                        response.Response = false;
+                    }
+                    break;
+                case "REMOVESESSION":
+                    var inforemovetoken = parameters.Deserialize<DTORequestGWebAPIRemoveSession>();
+                    if (inforemovetoken != null)
+                    {
+                        response.Response = await this.RemoveSession(request.Provider, request.Token, inforemovetoken);
+                    }
+                    else
+                    {
+                        response.Response = false;
+                    }
+                    break;
+                case "REFRESHTOKEN":
+                    response.Response = true;
+                    break;
+                //Funciones para PGAMobile
+                case "GETSTATUS":
+                    var infoestatus = parameters.Deserialize<DTORequestGWebAPIGetStatus>();
+                    if (infoestatus != null)
+                    {
+                        response.Response = new DTOResponseGWebAPIGetStatus
+                        {
+                            Identifier = await this.GetStatus(request.Provider, infoestatus.DocumentType, infoestatus.IDRegistry)
+                        };
+                    }
+                    else
+                    {
+                        response.Response = null;
+                    }
+                    break;
+                case "SETWORKORDERSTATE":
+                    break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
             }
@@ -113,6 +143,14 @@ namespace pga.api.Controllers
             stopwatch.Stop();
             response.ExecutionTime = stopwatch.Elapsed.TotalSeconds;
             return response;
+        }
+
+        private async Task<string?> GetStatus(string uuid_provider, int doctype, int id)
+        {
+            using (var boxhelper = new Box(uuid_provider))
+            {
+                return await boxhelper.GetBoxActivityHelper().GetLastIdentifierByDocument(EBoxDocumentType.Appointment, id);
+            }
         }
 
         private async Task<string> GetToken(string uuid_provider, string username, string password)
@@ -123,11 +161,18 @@ namespace pga.api.Controllers
             }
         }
 
-        private async Task<bool> CreateSession(string uuid_provider, string token, DTORequestGWebAPICreateSession info_newtoken)
+        private async Task<bool> CreateSession(string uuid_provider, string token, DTORequestGWebAPICreateSession? info_newtoken)
         {
-            using (var boxhelper = new Box(uuid_provider, token))
+            if (info_newtoken != null)
             {
-                return await boxhelper.GetBoxSessionsHelper().CreateSession(user_pgamobile: info_newtoken.User, appkey: info_newtoken.ApplicationKey, newtoken: info_newtoken.NewToken, ttl: info_newtoken.TTL, create_employ_if_not_exist: true);
+                using (var boxhelper = new Box(uuid_provider, token))
+                {
+                    return await boxhelper.GetBoxSessionsHelper().CreateSession(user_pgamobile: info_newtoken.User, appkey: info_newtoken.ApplicationKey, newtoken: info_newtoken.NewToken, ttl: info_newtoken.TTL, create_employ_if_not_exist: true);
+                }
+            }
+            else
+            {
+                return false;
             }
         }
 

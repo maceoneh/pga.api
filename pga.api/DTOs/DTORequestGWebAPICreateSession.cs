@@ -1,26 +1,25 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace pga.api.DTOs
 {
-    [DataContract]
     public class DTORequestGWebAPICreateSession
     {
-        [DataMember(Name = "user")]
+        [JsonPropertyName("user")]
         public string User { get; set; }
 
-        [DataMember(Name = "appkey")]
+        [JsonPropertyName("appkey")]
         public string ApplicationKey { get; set; }
 
-        [DataMember(Name = "newtoken")]
+        [JsonPropertyName("newtoken")]
         public string NewToken { get; set; }
 
-        [DataMember(Name = "uidgroup")]
+        [JsonPropertyName("uidgroup")]
         public string UUIDGroup { get; set; }
 
-        [DataMember(Name = "uidemploycollaborator")]
+        [JsonPropertyName("uidemploycollaborator")]
         public string UUIDEmployCollaborator { get; set; }
 
-        [DataMember(Name = "ttl")]
+        [JsonPropertyName("ttl")]
         public int TTL { get; set; }
     }
 }
