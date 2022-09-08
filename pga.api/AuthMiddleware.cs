@@ -1,4 +1,5 @@
 ﻿using es.dmoreno.utils.corenet.api.middleware;
+using es.dmoreno.utils.security;
 using pga.core;
 
 namespace pga.api
@@ -128,6 +129,8 @@ namespace pga.api
             {
                 case "BASIC":
                     return await this.CheckUserAsync(context);
+                case "BEARER":
+                    return await this.checkBearerAsync(context);
                 default:
                     return false;
             }
@@ -159,28 +162,33 @@ namespace pga.api
             }
         }
 
-        private async Task<bool> checkBearer(HttpContext context)
+        private async Task<bool> checkBearerAsync(HttpContext context)
         {
-            //var path = context.Request.Path;
-            //switch (path)
-            //{
-            //    case "/api/licenses/session/data":
-            //    case "/api/licenses/user/profile":
-            //    case "/api/licenses/session/environment":
-            //        using (var shelper = Core.Create().BuildSessionHelper())
-            //        {
-            //            var uuid = await shelper.GetUserUUID(context.Request.Headers["_token"]);
-            //            context.Request.Headers.Add("_uuid_user", uuid);
-            //            var session = await shelper.GetSessionByIdentifier(context.Request.Headers["_token"]);
-            //            if (session.IsExpired)
-            //            {
-            //                return false;
-            //            }
-            //            context.Items["session_data"] = session;
-            //        }
-            //        return true;
-            //}
-            return false;
+            var token = context.Items["_token"].ToString();
+            var provider_key = context.Request.Headers["Provider-Key"].ToString();
+            provider_key = Base64.Decode(provider_key);
+            //Se comprueba si el proveedor existe
+            using (var userhelper = new Users())
+            {
+                var provider_profile = await userhelper.GetProfile(provider_key);
+                if (provider_profile == null)
+                {
+                    return false;
+                }
+            }
+            //Se comprueba el id de sesión con la que se intenta acceder
+            using (var boxhelper = new Box(provider_key))
+            {
+                if (await boxhelper.GetBoxSessionsHelper().IsValidToken(token))
+                {
+                    context.Items.Add("_uuid_profile", provider_key);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
         }
     }
 }

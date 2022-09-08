@@ -276,12 +276,34 @@ namespace pga.core
         /// <returns></returns>
         public async Task<bool> AddStatusDownloadedAsync(DTOBoxAppointment a)
         {
+            var action_subject = await this.Box.WhoIs();
             return await this.Box.GetBoxMessageHelper().AddAsync(new DTOBoxMessage { 
                 Flow = EBoxMessageFlow.In,
                 RefAppointment = a.ID,
                 RefFile = a.RefFile,
+                RefSubject = action_subject.ID,
                 Type = EBoxMessageType.DownloadedAppointment
             });
+        }
+
+        /// <summary>
+        /// Agrega un mensaje genérico a un appointment
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="msg"></param>
+        /// <returns></returns>
+        public async Task<bool> AddMessageToAppointmentAsync(DTOBoxAppointment a, DTOBoxMessage msg)
+        {
+            var action_subject = await this.Box.WhoIs();
+            msg.RefAppointment = a.ID;
+            msg.RefFile = a.RefFile;
+            msg.RefSubject = action_subject.ID;
+            if (msg.Date == null)
+            {
+                msg.Date = DateTime.Now;
+            }
+            msg.Flow = EBoxMessageFlow.In;
+            return await this.Box.GetBoxMessageHelper().AddAsync(msg, fill_date: false);
         }
     }
 }

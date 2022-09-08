@@ -25,10 +25,13 @@ namespace pga.core
         /// </summary>
         /// <param name="a"></param>
         /// <returns></returns>
-        internal async Task<bool> AddAsync(DTOBoxMessage a)
+        internal async Task<bool> AddAsync(DTOBoxMessage a, bool fill_date = true)
         {
             string? aux = null;
-            a.Date = DateTime.Now;
+            if (fill_date || a.Date == null)
+            {
+                a.Date = DateTime.Now;
+            }
             a.Identifier = Token.generate(new ConfigToken { Length = 20, Letters = true, Numbers = true });
             if (a.Message != null)
             {

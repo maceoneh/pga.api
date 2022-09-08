@@ -41,7 +41,6 @@ namespace pga.api.Controllers
 
         private async Task<object> Process(DTORequestGWebAPI<Object> request)
         {
-            //var type = request.Parameters.GetType();
             //Se inicia un cronometro
             var stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -56,7 +55,7 @@ namespace pga.api.Controllers
                 await boxhelper.CreateUpdateDatabase();
             }
             //Se genera paquete de respuesta
-            var response = new DTOResponseGWebAPI<Object>
+            var r = new DTOResponseGWebAPI<Object>
             {
                 AKType = "response",
                 Debug = false,
@@ -90,7 +89,7 @@ namespace pga.api.Controllers
                     var credentials = parameters.Deserialize<DTORequestGWebAPIGetToken>();
                     if (credentials != null)
                     {
-                        response.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));
+                        r.Token = await this.GetToken(request.Provider, MD5Utils.GetHash(credentials.Username), MD5Utils.GetHash(credentials.Password));
                     }
                     break;
                 //Funciones para el administrador
@@ -98,51 +97,62 @@ namespace pga.api.Controllers
                     var infotoken = parameters.Deserialize<DTORequestGWebAPICreateSession>();
                     if (infotoken != null)
                     {
-                        response.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
+                        r.Response = await this.CreateSession(request.Provider, request.Token, infotoken);
                     }
                     else
                     {
-                        response.Response = false;
+                        r.Response = false;
                     }
                     break;
                 case "REMOVESESSION":
                     var inforemovetoken = parameters.Deserialize<DTORequestGWebAPIRemoveSession>();
                     if (inforemovetoken != null)
                     {
-                        response.Response = await this.RemoveSession(request.Provider, request.Token, inforemovetoken);
+                        r.Response = await this.RemoveSession(request.Provider, request.Token, inforemovetoken);
                     }
                     else
                     {
-                        response.Response = false;
+                        r.Response = false;
                     }
                     break;
                 case "REFRESHTOKEN":
-                    response.Response = true;
+                    r.Response = true;
                     break;
                 //Funciones para PGAMobile
                 case "GETSTATUS":
                     var infoestatus = parameters.Deserialize<DTORequestGWebAPIGetStatus>();
                     if (infoestatus != null)
                     {
-                        response.Response = new DTOResponseGWebAPIGetStatus
+                        r.Response = new DTOResponseGWebAPIGetStatus
                         {
-                            Identifier = await this.GetStatus(request.Provider, infoestatus.DocumentType, infoestatus.IDRegistry)
+                            Identifier = await this.GetStatus(request.Provider, request.Token, infoestatus.DocumentType, infoestatus.IDRegistry)
                         };
                     }
                     else
                     {
-                        response.Response = null;
+                        r.Response = null;
                     }
                     break;
                 case "SETWORKORDERSTATE":
                     var infoworkorderstate = parameters.Deserialize<DTORequestGWebAPIWorkOrderState>();
                     if (infoworkorderstate != null)
                     {
-                        response.Response = await this.SetWorkOrderStatus(request.Provider, infoworkorderstate);
+                        r.Response = await this.SetWorkOrderStatus(request.Provider, request.Token, infoworkorderstate);
                     }
                     else
                     {
-                        response.Response = false;
+                        r.Response = false;
+                    }
+                    break;
+                case "SENDMESSAGE":
+                    var infomessage = parameters.Deserialize<DTORequestGWebAPISendMessage>();
+                    if (infomessage != null)
+                    {
+                        r.Response = await this.ReceiveMessage(request.Provider, request.Token, infomessage);
+                    }
+                    else
+                    {
+                        r.Response = false;
                     }
                     break;
                 default:
@@ -150,13 +160,39 @@ namespace pga.api.Controllers
             }
             //Se devuelve la respuesta
             stopwatch.Stop();
-            response.ExecutionTime = stopwatch.Elapsed.TotalSeconds;
-            return response;
+            r.ExecutionTime = stopwatch.Elapsed.TotalSeconds;
+            return r;
         }
 
-        private async Task<bool> SetWorkOrderStatus(string uuid_provider, DTORequestGWebAPIWorkOrderState s)
+        private async Task<bool> ReceiveMessage(string uuid_provider, string token, DTORequestGWebAPISendMessage msg)
         {
-            using (var boxhelper = new Box(uuid_provider))
+            using (var boxhelper = new Box(uuid_provider, token))
+            {
+                var filehelper = boxhelper.GetBoxFileHelper();
+                var appointment = await filehelper.GetAppointmentByExternalIDAsync(msg.External_ID);
+                if (appointment != null)
+                {
+                    if (!string.IsNullOrEmpty(msg.Value))
+                    {
+                        if (msg.EncodeType == EEncodeType.Base64)
+                        {
+                            msg.Value = Base64.Decode(msg.Value);
+                        }
+                    }
+                    return await filehelper.AddMessageToAppointmentAsync(appointment, new DTOBoxMessage { 
+                        Flow = EBoxMessageFlow.In,
+                        Message = msg.Value,
+                        Date = new DateTime(msg.TemporaryMark)
+                    });
+
+                }
+            }
+            return false;
+        }
+
+        private async Task<bool> SetWorkOrderStatus(string uuid_provider, string token, DTORequestGWebAPIWorkOrderState s)
+        {
+            using (var boxhelper = new Box(uuid_provider, token))
             {
                 var filehelper = boxhelper.GetBoxFileHelper();
                 var appointment = await filehelper.GetAppointmentByExternalIDAsync(s.IDMasterDetail);
@@ -171,9 +207,9 @@ namespace pga.api.Controllers
             }
         }
 
-        private async Task<string?> GetStatus(string uuid_provider, int doctype, int id)
+        private async Task<string?> GetStatus(string uuid_provider, string token, int doctype, int id)
         {
-            using (var boxhelper = new Box(uuid_provider))
+            using (var boxhelper = new Box(uuid_provider, token))
             {
                 return await boxhelper.GetBoxMessageHelper().GetLastIdentifierByDocumentAsync(EBoxDocumentType.Appointment, id);
             }

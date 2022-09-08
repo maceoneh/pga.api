@@ -13,13 +13,16 @@ namespace pga.core.DTOsBox
         public const string FilterID = TAG + "ID";
         public const string FilterRefFile = TAG + "RefFile";
         public const string FilterRefAppointment = TAG + "RefAppointment";
+        public const string FilterRefSubject = TAG + "Subject";
         public const string FilterIdentifier = TAG + "Identifier";
         public const string IdxRefFile = TAG + "RefFile";
         public const string IdxRefAppointment = TAG + "RefAppointment";
-        public const string IdxIdentifier = TAG + "Identifier";
+        public const string IdxRefSubject = TAG + "Subject";
+        public const string IdxIdentifier = TAG + "Identifier";        
         public const string IdxTypicalSearch_1 = TAG + "TypicalSearch_1";
         public const string IdxTypicalSearch_2 = TAG + "TypicalSearch_2";
         public const string IdxTypicalSearch_3 = TAG + "TypicalSearch_3";
+        public const string IdxTypicalSearch_4 = TAG + "TypicalSearch_4";
 
         [Field(FieldName = "id", IsAutoincrement = true, IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int ID { get; set; }
@@ -38,6 +41,12 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "ref_appointment", Type = ParamType.Int32, DefaultValue = int.MinValue)]
         internal int RefAppointment { get; set; } = int.MinValue;
 
+        [Index(Name = IdxTypicalSearch_3)]
+        [Index(Name = IdxTypicalSearch_4)]
+        [Filter(Name = FilterRefSubject)]
+        [Field(FieldName = "ref_subject", Type = ParamType.Int32, DefaultValue = int.MinValue)]
+        internal int RefSubject { get; set; } = int.MinValue;
+
         [Filter(Name = FilterIdentifier)]
         [Index(Name = IdxIdentifier, Unique = true)]
         [Field(FieldName = "identifier", Type = ParamType.String)]
@@ -46,6 +55,7 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "date", Type = ParamType.DateTime)]
         public DateTime Date { get; set; }
 
+        [Index(Name = IdxTypicalSearch_4)]
         [Index(Name = IdxTypicalSearch_3)]
         [Index(Name = IdxTypicalSearch_2)]
         [Index(Name = IdxTypicalSearch_1)]
