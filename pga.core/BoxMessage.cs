@@ -13,6 +13,12 @@ namespace pga.core
 {
     public class BoxMessage
     {
+        /// <summary>
+        /// Indica el temaño máximo que un mensaje debe tener para ser almacenado en la base de datos.
+        /// El tamaño está calculado para almacenar mensajes cortos de texto en la base de datos.
+        /// </summary>
+        public const int MaxValueLength = 255;
+
         private Box Box { get; }
 
         internal BoxMessage(Box b)
@@ -35,7 +41,7 @@ namespace pga.core
             a.Identifier = Token.generate(new ConfigToken { Length = 20, Letters = true, Numbers = true });
             if (a.Message != null)
             {
-                if (a.Message.Length > 2500)
+                if (a.Message.Length > MaxValueLength)
                 {
                     aux = a.Message;
                     a.Message = null;
@@ -61,7 +67,6 @@ namespace pga.core
                 return false;
             }
         }
-
 
         /// <summary>
         /// Obtiene a raiz de un identificador los siguientes registros de actividad relacionados con el identificvador indicado
