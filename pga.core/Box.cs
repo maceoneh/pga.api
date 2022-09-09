@@ -1,5 +1,6 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.textplain;
+using es.dmoreno.utils.permissions;
 using es.dmoreno.utils.security;
 using es.dmoreno.utils.serialize;
 using pga.core.DTOsBox;
@@ -178,6 +179,42 @@ namespace pga.core
                 using (var filehelper = new TextPlainFile(path + @"\version.json"))
                 {
                     filehelper.set(JSon.serializeJSON<DTOBoxVersion>(new DTOBoxVersion { VersionToken = Box.LastUpdateToken, LastUpdateDatabase = DateTime.Now }));
+                }
+
+                //Se actualiza tambien la estructura de la utilidad de permisos
+                using (var permissionshelper = new Permissions(this.DataPath))
+                {
+                    //Se crean las tablas
+                    await permissionshelper.BuildAsync();
+                    //Se crean los permisos
+                    var e_appointment = await permissionshelper.AddEntityAsync("appointment");
+                    var e_subject = await permissionshelper.AddEntityAsync("subject");
+                    var e_file = await permissionshelper.AddEntityAsync("file");
+                    var e_message = await permissionshelper.AddEntityAsync("message");
+                    var a_create = await permissionshelper.AddActionAsync("create");
+                    var a_modify = await permissionshelper.AddActionAsync("modify");
+                    var a_delete = await permissionshelper.AddActionAsync("delete");
+                    var p_create_appointment = await permissionshelper.AddPermissionAsync(e_appointment, a_create, "crear una cita");
+                    var p_modify_appointment = await permissionshelper.AddPermissionAsync(e_appointment, a_modify, "modificar una cita");
+                    var p_delete_appointment = await permissionshelper.AddPermissionAsync(e_appointment, a_delete, "eliminar una cita");
+                    var p_create_subject = await permissionshelper.AddPermissionAsync(e_subject, a_create, "crear un sujeto (cliente, proveedor, ...)");
+                    var p_modify_subject = await permissionshelper.AddPermissionAsync(e_subject, a_modify, "modificar un sujeto (cliente, proveedor, ...)");
+                    var p_delete_subject = await permissionshelper.AddPermissionAsync(e_subject, a_delete, "eliminar un sujeto (cliente, proveedor, ...)");
+                    var p_create_file = await permissionshelper.AddPermissionAsync(e_file, a_create, "crear un expediente");
+                    var p_modify_file = await permissionshelper.AddPermissionAsync(e_file, a_modify, "modificar un expediente");
+                    var p_delete_file = await permissionshelper.AddPermissionAsync(e_file, a_delete, "eliminar un expediente");
+                    var p_create_msg = await permissionshelper.AddPermissionAsync(e_message, a_create, "crear un mensaje");
+                    var p_modify_msg = await permissionshelper.AddPermissionAsync(e_message, a_modify, "modificar un mensaje");
+                    var p_delete_msg = await permissionshelper.AddPermissionAsync(e_message, a_delete, "eliminar un mensaje");
+                    //Se asocian los permisos a los permisos a los usuarios
+                    //Se obtienen los usuarios empleados
+                    var subjectshelper = this.GetBoxSubjectHelper();
+                    var employees = await subjectshelper.GetEmployeesAsync();
+                    foreach (var item in employees)
+                    {
+                        //A los empleados se les da permiso a enviar mensajes
+                        await permissionshelper.AddSubjectToPermission(p_create_msg, item.ID);
+                    }
                 }
             }
         }

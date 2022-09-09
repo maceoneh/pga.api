@@ -50,8 +50,8 @@ namespace pga.core
         /// <returns></returns>
         public async Task<DTOBoxSubject?> GetEmployByPGAMobileUser(string pgamobile_user)
         {
-            var db_subjec = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
-            var employ = await db_subjec.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions {
+            var db_subject = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
+            var employ = await db_subject.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions {
                 Filters = new List<Filter> {
                     new Filter { Name = DTOBoxSubjectEmploy.FilterUserPGAMobile, ObjectValue = pgamobile_user, Type = FilterType.Equal }
                 }
@@ -64,6 +64,28 @@ namespace pga.core
             {
                 return null;
             }
+        }
+
+        internal async Task<List<DTOBoxSubject>> GetEmployeesAsync()
+        {
+            var db_subject_employ = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
+            var employ_list = await db_subject_employ.selectAsync<DTOBoxSubjectEmploy>();
+            if (employ_list.Count > 0)
+            {
+                var ids = new List<int>(employ_list.Count);
+                foreach (var subject in employ_list)
+                {
+                    ids.Add(subject.RefSubject);
+                }
+                var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
+                return await db_subjects.selectAsync<DTOBoxSubject>(new StatementOptions { 
+                    Filters = new List<Filter> { 
+                        new Filter { Name = DTOBoxSubject.FilterID, ObjectValue = ids, Type = FilterType.In }
+                    }
+                });
+            }
+
+            return null;
         }
 
         internal async Task<bool> IsRootAsync(DTOBoxSubject s)
