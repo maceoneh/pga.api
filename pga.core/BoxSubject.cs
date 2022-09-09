@@ -88,6 +88,29 @@ namespace pga.core
             return null;
         }
 
+        internal async Task<List<DTOBoxSubject>> GetPermissionsGroupAsync()
+        {
+            var db_subject_employ = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
+            var employ_list = await db_subject_employ.selectAsync<DTOBoxSubjectEmploy>();
+            if (employ_list.Count > 0)
+            {
+                var ids = new List<int>(employ_list.Count);
+                foreach (var subject in employ_list)
+                {
+                    ids.Add(subject.RefSubject);
+                }
+                var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
+                return await db_subjects.selectAsync<DTOBoxSubject>(new StatementOptions
+                {
+                    Filters = new List<Filter> {
+                        new Filter { Name = DTOBoxSubject.FilterID, ObjectValue = ids, Type = FilterType.In }
+                    }
+                });
+            }
+
+            return null;
+        }
+
         internal async Task<bool> IsRootAsync(DTOBoxSubject s)
         {
             var actual_root = await this.GetRootAsync();
@@ -163,6 +186,34 @@ namespace pga.core
                         employ.RefSubject = s.ID;
                     }
                     return await db_subjectemploy.insertAsync(employ);
+                }
+            }
+            else if (t == EBoxSubjectType.PermissionGroup)
+            {
+                var db_subjectgroup = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectPermissionGroup>();
+                var permissiongroup = await db_subjectgroup.FirstIfExistsAsync<DTOBoxSubjectPermissionGroup>(new StatementOptions { 
+                    Filters = new List<Filter> { 
+                        new Filter { Name = DTOBoxSubjectPermissionGroup.FilterRefSubject, ObjectValue = s.ID, Type = FilterType.Equal }
+                    }
+                });
+                if (permissiongroup == null)
+                {
+                    if (o != null)
+                    {
+                        permissiongroup = o as DTOBoxSubjectPermissionGroup;
+                    }
+                    if (permissiongroup == null)
+                    {
+                        permissiongroup = new DTOBoxSubjectPermissionGroup
+                        {
+                            RefSubject = s.ID
+                        };
+                    }
+                    else
+                    { 
+                        permissiongroup.RefSubject = s.ID;
+                    }
+                    return await db_subjectgroup.insertAsync(permissiongroup);
                 }
             }
 
