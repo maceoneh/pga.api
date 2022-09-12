@@ -207,14 +207,29 @@ namespace pga.core
                     var p_create_msg = await permissionshelper.AddPermissionAsync(e_message, a_create, "crear un mensaje");
                     var p_modify_msg = await permissionshelper.AddPermissionAsync(e_message, a_modify, "modificar un mensaje");
                     var p_delete_msg = await permissionshelper.AddPermissionAsync(e_message, a_delete, "eliminar un mensaje");
-                    //Se asocian los permisos a los permisos a los usuarios
-                    //Se obtienen los usuarios empleados
+                    //Se crean los grupos si no existen
                     var subjectshelper = this.GetBoxSubjectHelper();
+                    var employees_group = await subjectshelper.LoadOrCreateSubjectAsync(new DTOBoxSubject { 
+                        Name = "Empleados",
+                        Description = "Grupo de permisos al que un sujeto del tipo empleado pertenece para realizar sus funciones correctamente"
+                    });
+                    await subjectshelper.AddSubjectToAsync(employees_group, EBoxSubjectType.PermissionGroup);
+                    var g_employees = await permissionshelper.AddGroupAsync("Empleado", employees_group.UUID);
+                    var users_group = await subjectshelper.LoadOrCreateSubjectAsync(new DTOBoxSubject
+                    {
+                        Name = "Tramitadores",
+                        Description = "Grupo de permisos al que un sujeto del tipo tramitador debe pertenecer para realizar sus funciones correctamente"
+                    });
+                    await subjectshelper.AddSubjectToAsync(users_group, EBoxSubjectType.PermissionGroup);
+                    var g_users = await permissionshelper.AddGroupAsync("Usuario", users_group.UUID);
+                    //Se asocian a los grupos los permisos necesarios
+                    await permissionshelper.AddSubjectToPermission(p_create_msg, g_employees.RemoteUUID); //Un empleado puede enviar mensajes                    
+                    //Se obtienen los usuarios empleados
                     var employees = await subjectshelper.GetEmployeesAsync();
                     foreach (var item in employees)
                     {
-                        //A los empleados se les da permiso a enviar mensajes
-                        await permissionshelper.AddSubjectToPermission(p_create_msg, item.ID);
+                        //Se asocia el empleado al grupo de empleados
+                        await permissionshelper.AddSubjectToGroup(item.UUID, g_employees);
                     }
                 }
             }

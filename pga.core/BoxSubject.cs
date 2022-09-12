@@ -88,6 +88,10 @@ namespace pga.core
             return null;
         }
 
+        /// <summary>
+        /// Devuelve los usuarios que son Grupos de permisos
+        /// </summary>
+        /// <returns></returns>
         internal async Task<List<DTOBoxSubject>> GetPermissionsGroupAsync()
         {
             var db_subject_employ = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
@@ -107,8 +111,10 @@ namespace pga.core
                     }
                 });
             }
-
-            return null;
+            else
+            {
+                return null;
+            }
         }
 
         internal async Task<bool> IsRootAsync(DTOBoxSubject s)

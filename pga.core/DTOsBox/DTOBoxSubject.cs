@@ -103,6 +103,10 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "email", Type = ParamType.String, AllowNull = true)]
         public string? eMail { get; set; }
 
+        [JsonPropertyName("description")]
+        [Field(FieldName = "description", Type = ParamType.String, AllowNull = true)]
+        public string? Description { get; set; }
+
         /// <summary>
         /// Duplica el contenido del sujeto actual en la clase pasada por parámetro
         /// </summary>
@@ -118,6 +122,7 @@ namespace pga.core.DTOsBox
             s.PostalCode = this.PostalCode;
             s.Surname = this.Surname;
             s.UUID = this.UUID;
+            s.Description = this.Description;
             return s;
         }
     }
