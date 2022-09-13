@@ -7,6 +7,7 @@ using pga.core.DTOsBox;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace pga.core
         /// Buzones con la base de datos actualizada
         /// </summary>
         static private List<string> BoxesUpdatedDB { get; } = new List<string>();
+
+        static private List<DTOBoxSessionPermisissions> PermissionsByBox { get; } = new List<DTOBoxSessionPermisissions>();
 
         public string UUID { get; private set; }
 
@@ -223,13 +226,13 @@ namespace pga.core
                     await subjectshelper.AddSubjectToAsync(users_group, EBoxSubjectType.PermissionGroup);
                     var g_users = await permissionshelper.AddGroupAsync("Usuario", users_group.UUID);
                     //Se asocian a los grupos los permisos necesarios
-                    await permissionshelper.AddSubjectToPermission(p_create_msg, g_employees.RemoteUUID); //Un empleado puede enviar mensajes                    
+                    await permissionshelper.AddSubjectToPermissionAsync(p_create_msg, g_employees.RemoteUUID); //Un empleado puede enviar mensajes                    
                     //Se obtienen los usuarios empleados
                     var employees = await subjectshelper.GetEmployeesAsync();
                     foreach (var item in employees)
                     {
                         //Se asocia el empleado al grupo de empleados
-                        await permissionshelper.AddSubjectToGroup(item.UUID, g_employees);
+                        await permissionshelper.AddSubjectToGroupAsync(item.UUID, g_employees);
                     }
                 }
             }
@@ -242,6 +245,71 @@ namespace pga.core
                 this.Subject = await this.GetBoxSessionsHelper().WhoIs();
             }
             return this.Subject;
+        }
+
+        internal async Task<bool> IsRoot()
+        {
+            var subjecthelper = this.GetBoxSubjectHelper();
+            var root = await subjecthelper.GetRootAsync();
+            return (await this.WhoIs()).ID == root.RefSubject;
+        }
+
+        /// <summary>
+        /// Comnprueba si un sujeto tiene permiso para una determoinada accion
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        internal async Task<bool> SessionHasPermission(string action, string entity)
+        {
+            //Se comprueba si existe el box
+            var box_permision = PermissionsByBox.Where(reg => reg.BoxIdentifier == this.UUID).FirstOrDefault();
+            if (box_permision == null)
+            {
+                box_permision = new DTOBoxSessionPermisissions { 
+                    BoxIdentifier = this.UUID
+                };
+                PermissionsByBox.Add(box_permision);
+            }
+            //Se busca la session inidicada
+            var session_permissions = box_permision.PermissionsBySession.Where(reg => reg.Session == this.AccessToken).FirstOrDefault();
+            //Si no existe la session se cargan los permisos, estos se mantendrán hasta que se genere una nueva sesion
+            if (session_permissions == null)
+            {
+                session_permissions = new DTOBoxSessionPermissionsByIdentifier { 
+                    Session = this.AccessToken,
+                    IsRoot = await this.IsRoot()
+                };
+                using (var permissionshelper = new Permissions(this.DataPath))
+                {
+                    session_permissions.Permissions = await permissionshelper.GetPermisssionsAsync((await this.WhoIs()).UUID);
+                }
+                box_permision.PermissionsBySession.Add(session_permissions);
+            }
+            if (session_permissions.IsRoot)
+            {
+                return true;
+            }
+            else
+            {
+                //Se busca si existe el permiso
+                return session_permissions.Permissions.Where(reg => reg.Action.Name == action.ToUpper().Trim() && reg.Entity.Name == entity.ToUpper().Trim()).Count() > 0;
+            }
+        }
+
+        /// <summary>
+        /// Comprueba si un sujeto tiene permiso para una determinada accion y si no lo tiene lanza una excepcion
+        /// </summary>
+        /// <param name="action"></param>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        internal async Task CheckPermissionAndFire(string action, string entity)
+        {
+            
+            if (!await this.SessionHasPermission(action, entity))
+            {
+                throw new PermissionException();
+            }
         }
 
         public BoxSubject GetBoxSubjectHelper()

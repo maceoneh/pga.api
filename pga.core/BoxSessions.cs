@@ -20,7 +20,7 @@ namespace pga.core
             this.Box = b;
         }
 
-        internal async Task<DTOBoxSubject> WhoIs()
+        internal async Task<DTOBoxSubject?> WhoIs()
         {
             var db_sessions = await this.Box.DBLogic.ProxyStatement<DTOBoxSession>();
             var session_to_check = await db_sessions.FirstIfExistsAsync<DTOBoxSession>(new StatementOptions { 
