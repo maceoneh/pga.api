@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Json.Serialization;
 
 namespace pga.core.DTOs
 {
-    [DataContract]
     [Table(Name = "users", FilePerTable = true)]
     public class DTOUser
     {
@@ -20,13 +20,13 @@ namespace pga.core.DTOs
         [Field(FieldName = "id", IsPrimaryKey = true, Type = ParamType.Int32, IsAutoincrement = true)]
         internal int ID { get; set; }
 
-        [DataMember(Name = "user")]
+        [JsonPropertyName("user")]
         [Filter(Name = FilterUserMD5)]
         [Index(Name = IdxUserMD5, Unique = true)]
         [Field(FieldName = "user_md5", Type = ParamType.String)]
         public string UserMD5 { get; set; }
 
-        [DataMember(Name = "password")]
+        [JsonPropertyName("password")]
         [Field(FieldName = "password_md5", Type = ParamType.String)]
         public string PasswordMD5 { get; set; }
     }
