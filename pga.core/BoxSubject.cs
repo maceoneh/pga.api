@@ -95,7 +95,7 @@ namespace pga.core
         internal async Task<List<DTOBoxSubject>> GetPermissionsGroupAsync()
         {
             var db_subject_employ = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
-            var employ_list = await db_subject_employ.selectAsync<DTOBoxSubjectEmploy>();
+            var employ_list = await db_subject_employ.selectAsync<DTOBoxSubjectPermissionGroup>();
             if (employ_list.Count > 0)
             {
                 var ids = new List<int>(employ_list.Count);

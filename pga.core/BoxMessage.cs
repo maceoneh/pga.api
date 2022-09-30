@@ -1,6 +1,7 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
 using es.dmoreno.utils.dataaccess.textplain;
+using es.dmoreno.utils.permissions;
 using es.dmoreno.utils.security;
 using pga.core.DTOsBox;
 using System;
@@ -59,6 +60,28 @@ namespace pga.core
                         filetexthelper.set(aux);
                     }
                     await db_activity.updateAsync(a);
+                }
+                //Se agregan los permisos al registro
+                var users_group = await this.Box.GetUsersGroupAsync();
+                DTOUUIDRecordPermision? record_permissions = null;
+                if (users_group != null)
+                {
+                    record_permissions = new DTOUUIDRecordPermision { 
+                        UUID = users_group.UUID,
+                        CanRead = true,
+                        CanWrite = false
+                    };                    
+                }
+                using (var permissionshelper = new Permissions(this.Box.DataPath))
+                {
+                    await permissionshelper.AddPermissionAsync<DTOBoxMessage>(a,
+                        new DTORecordPermission
+                        {
+                            UUIDOwner = this.Box.UUID,
+                            UUIDRecordPermissions = new DTOUUIDRecordPermision[] {
+                                record_permissions
+                            }
+                        });
                 }
                 return true;
             }

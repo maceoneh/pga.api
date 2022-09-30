@@ -15,6 +15,16 @@ namespace pga.core.DTOsBox
     { 
         public string Session { get; set; }
         public bool IsRoot { get; set; }
-        public List<DTOPermission?> Permissions { get; set; }
+        public List<DTOPermission>? Permissions { get; set; }
+
+        /// <summary>
+        /// Identifica al grupo de usuarios tramitadores
+        /// </summary>
+        public DTOBoxSubject? UsersGroup { get; set; }
+
+        /// <summary>
+        /// Identifica al grupo de empleados
+        /// </summary>
+        public DTOBoxSubject? EmployeesGroup { get; set; }
     }
 }

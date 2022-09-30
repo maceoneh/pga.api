@@ -191,8 +191,7 @@ namespace pga.core
                     //Se crean las tablas
                     await permissionshelper.BuildAsync();
                     //Se crean las tablas que contienen los permisos de los registros
-                    await permissionshelper.CreateTablePermissions<DTOBoxMessage>();
-                    await permissionshelper.AddPermissionAsync(new DTOBoxMessage { ID = 1 }, null);
+                    await permissionshelper.CreateTablePermissions<DTOBoxMessage>();                    
                     //Se crean los permisos
                     var e_appointment = await permissionshelper.AddEntityAsync("appointment");
                     var e_subject = await permissionshelper.AddEntityAsync("subject");
@@ -235,8 +234,8 @@ namespace pga.core
                     foreach (var item in employees)
                     {
                         //Se asocia el empleado al grupo de empleados
-                        await permissionshelper.AddSubjectToGroupAsync(item.UUID, g_employees);
-                    }
+                        await permissionshelper.AddSubjectToGroupAsync(item.UUID, g_employees);                        
+                    }                    
                 }
             }
         }
@@ -313,6 +312,42 @@ namespace pga.core
             {
                 throw new PermissionException();
             }
+        }
+
+        /// <summary>
+        /// Carga una cache en la session con los datos de los grupos de usuarios para ser accedido sin consultar la bd
+        /// </summary>
+        /// <returns></returns>
+        private async Task<DTOBoxSessionPermissionsByIdentifier> LoadGroupsInThisSessionAsync()
+        {
+            var actual_session_permissions = PermissionsByBox.Where(reg => reg.BoxIdentifier == this.UUID).FirstOrDefault().PermissionsBySession.Where(reg => reg.Session == this.AccessToken).FirstOrDefault();
+            if (actual_session_permissions.UsersGroup == null || actual_session_permissions.EmployeesGroup == null)
+            {
+                var permissions_groups = await this.GetBoxSubjectHelper().GetPermissionsGroupAsync();
+                actual_session_permissions.EmployeesGroup = permissions_groups.Where(reg => reg.Name == "Empleados").FirstOrDefault();
+                actual_session_permissions.UsersGroup = permissions_groups.Where(reg => reg.Name == "Tramitadores").FirstOrDefault();
+            }
+            return actual_session_permissions;
+        }
+
+        /// <summary>
+        /// Devuelve el identificador del grupo de empleados
+        /// </summary>
+        /// <returns></returns>
+        internal async Task<DTOBoxSubject?> GetEmployeesGroupAsync()
+        {
+            var a = await this.LoadGroupsInThisSessionAsync();
+            return a.EmployeesGroup;
+        }
+
+        /// <summary>
+        /// Devuelve el identificador del grupo de usuarios
+        /// </summary>
+        /// <returns></returns>
+        internal async Task<DTOBoxSubject?> GetUsersGroupAsync()
+        {
+            var a = await this.LoadGroupsInThisSessionAsync();
+            return a.UsersGroup;
         }
 
         public BoxSubject GetBoxSubjectHelper()
