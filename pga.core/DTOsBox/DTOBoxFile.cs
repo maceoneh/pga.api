@@ -1,5 +1,6 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
+using es.dmoreno.utils.permissions;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -11,7 +12,7 @@ using System.Xml.Linq;
 namespace pga.core.DTOsBox
 {
     [Table(Name = "files", FilePerTable = true)]
-    public class DTOBoxFile
+    public class DTOBoxFile : IDataPermission
     {
         public const string TAG = "DTOBoxFile";
         public const string FilterID = TAG + "ID";
@@ -137,6 +138,8 @@ namespace pga.core.DTOsBox
         [Filter(Name = FilterPopulation)]
         [Field(FieldName = "population", Type = ParamType.String, AllowNull = true)]
         public string? Population { get; set; }
+
+        public string IDRecord => this.ID.ToString();
 
         internal DTOBoxFile CopyTo(DTOBoxFile f)
         {

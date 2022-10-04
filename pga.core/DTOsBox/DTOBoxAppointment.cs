@@ -1,5 +1,6 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
+using es.dmoreno.utils.permissions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Text;
 namespace pga.core.DTOsBox
 {
     [Table(Name = "appointments", FilePerTable = true)]
-    public class DTOBoxAppointment
+    public class DTOBoxAppointment : IDataPermission
     {
         public const string TAG = "DTOBoxAppointment";
         public const string FilterExternalID = TAG + "ExternalID";
@@ -49,6 +50,8 @@ namespace pga.core.DTOsBox
 
         [Field(FieldName = "status", Type = ParamType.Int32)]
         public EBoxAppointmentStatus Status { get; set; } = EBoxAppointmentStatus.InProgress;
+
+        public string IDRecord => this.ID.ToString();
 
         internal DTOBoxAppointment CopyTo(DTOBoxAppointment a)
         {

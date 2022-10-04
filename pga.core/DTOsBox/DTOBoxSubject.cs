@@ -1,5 +1,6 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
+using es.dmoreno.utils.permissions;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -11,7 +12,7 @@ using System.Xml.Linq;
 namespace pga.core.DTOsBox
 {    
     [Table(Name = "subjects")]
-    public class DTOBoxSubject
+    public class DTOBoxSubject : IDataPermission
     {
         /// <summary>
         /// Indica que solo contiene el valor UUID, este metodo sirve para saber si se quiere hacer una carga del dato
@@ -106,6 +107,8 @@ namespace pga.core.DTOsBox
         [JsonPropertyName("description")]
         [Field(FieldName = "description", Type = ParamType.String, AllowNull = true)]
         public string? Description { get; set; }
+
+        public string IDRecord => this.ID.ToString();
 
         /// <summary>
         /// Duplica el contenido del sujeto actual en la clase pasada por parámetro
