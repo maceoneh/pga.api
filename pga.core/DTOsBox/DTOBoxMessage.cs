@@ -1,5 +1,6 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
+using es.dmoreno.utils.permissions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Text;
 namespace pga.core.DTOsBox
 {
     [Table(Name = "messages", FilePerTable = true)]
-    public class DTOBoxMessage
+    public class DTOBoxMessage : IDataPermission
     {
         public const string TAG = "DTOBoxMessage";
         public const string FilterID = TAG + "ID";
@@ -75,5 +76,7 @@ namespace pga.core.DTOsBox
 
         [Field(FieldName = "flow", Type = ParamType.Int32, DefaultValue = (int)EBoxMessageFlow.In)]
         public EBoxMessageFlow Flow { get; set; }
+
+        public string IDRecord => this.ID.ToString();
     }
 }
