@@ -233,14 +233,24 @@ namespace pga.core
                     //Se asocian a los grupos los permisos necesarios
                     await permissionshelper.AddSubjectToPermissionAsync(p_create_msg, g_employees.RemoteUUID); //Un empleado puede enviar mensajes                    
                     //Se obtienen los usuarios empleados
-                    var employees = await subjectshelper.GetEmployeesAsync();
-                    var db_messages = await this.DBLogic.ProxyStatement<DTOBoxMessage>();
-                    var list = await db_messages.selectAsync<DTOBoxMessage>();
+                    var employees = await subjectshelper.GetEmployeesAsync();                    
                     foreach (var item in employees)
                     {
                         //Se asocia el empleado al grupo de empleados
                         await permissionshelper.AddSubjectToGroupAsync(item.UUID, g_employees);                        
-                    }                    
+                    }
+#if DEBUG
+                    //Pruebas
+                    var db_messages = await this.DBLogic.ProxyStatement<DTOBoxMessage>();
+                    var list = await db_messages.selectAsync<DTOBoxMessage>();
+                    foreach (var item in employees)
+                    {
+                        for (int i = 0; i < list.Count; i++)
+                        {
+                            var a = await permissionshelper.GetDataPermission(list[i], item.UUID);
+                        }
+                    }
+#endif
                 }
             }
         }
