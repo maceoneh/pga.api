@@ -74,7 +74,7 @@ namespace pga.core
                 }
                 using (var permissionshelper = new Permissions(this.Box.DataPath))
                 {
-                    await permissionshelper.AddPermissionAsync<DTOBoxMessage>(a,
+                    await permissionshelper.AddDataPermissionAsync<DTOBoxMessage>(a,
                         new DTORecordPermission
                         {
                             UUIDOwner = (await this.Box.WhoIs()).UUID,

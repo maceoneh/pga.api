@@ -191,10 +191,10 @@ namespace pga.core
                     //Se crean las tablas
                     await permissionshelper.BuildAsync();
                     //Se crean las tablas que contienen los permisos de los registros
-                    await permissionshelper.CreateTablePermissions<DTOBoxMessage>();
-                    await permissionshelper.CreateTablePermissions<DTOBoxSubject>();
-                    await permissionshelper.CreateTablePermissions<DTOBoxFile>();
-                    await permissionshelper.CreateTablePermissions<DTOBoxAppointment>();
+                    await permissionshelper.CreateTableDataPermissions<DTOBoxMessage>();
+                    await permissionshelper.CreateTableDataPermissions<DTOBoxSubject>();
+                    await permissionshelper.CreateTableDataPermissions<DTOBoxFile>();
+                    await permissionshelper.CreateTableDataPermissions<DTOBoxAppointment>();
                     //Se crean los permisos
                     var e_appointment = await permissionshelper.AddEntityAsync("appointment");
                     var e_subject = await permissionshelper.AddEntityAsync("subject");
