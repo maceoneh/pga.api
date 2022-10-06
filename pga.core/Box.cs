@@ -28,7 +28,7 @@ namespace pga.core
 
         static private List<DTOBoxSessionPermisissions> PermissionsByBox { get; } = new List<DTOBoxSessionPermisissions>();
 
-        public string UUID { get; private set; }
+        public string BoxUUID { get; private set; }
 
         public string AccessToken { get; private set; }
 
@@ -37,7 +37,7 @@ namespace pga.core
         /// <summary>
         /// Ruta al directorio raiz del box
         /// </summary>
-        internal string DataPath { get => Init.BoxesPath + @"\" + this.UUID; }
+        internal string DataPath { get => Init.BoxesPath + @"\" + this.BoxUUID; }
 
         /// <summary>
         /// Ruta al directorio donde se guarara la información adicional de las actividades
@@ -84,27 +84,27 @@ namespace pga.core
         {
             if (b != null)
             {
-                this.UUID = b.UUID;
+                this.BoxUUID = b.BoxUUID;
                 this.AccessToken = b.AccessToken;
                 this._db_logic = b._db_logic;
                 this._dispose_db_logic = false;
-                if (string.IsNullOrWhiteSpace(this.UUID))
+                if (string.IsNullOrWhiteSpace(this.BoxUUID))
                 {
                     throw new ArgumentException("UUID can't be empty");
                 }
             }
             else
             {
-                this.UUID = uuid;
+                this.BoxUUID = uuid;
                 this.AccessToken = accessToken;
-                if (string.IsNullOrWhiteSpace(this.UUID))
+                if (string.IsNullOrWhiteSpace(this.BoxUUID))
                 {
                     throw new ArgumentException("UUID can't be empty");
                 }
-                if (!BoxesBuilded.Contains(this.UUID))
+                if (!BoxesBuilded.Contains(this.BoxUUID))
                 {
                     this.BuildIfNecessary();
-                    BoxesBuilded.Add(this.UUID);
+                    BoxesBuilded.Add(this.BoxUUID);
                 }
                 this._db_logic = new DataBaseLogic(new ConnectionParameters
                 {
@@ -117,7 +117,7 @@ namespace pga.core
 
         public void BuildIfNecessary()
         {
-            var path = Init.BoxesPath + @"\" + this.UUID;
+            var path = Init.BoxesPath + @"\" + this.BoxUUID;
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -145,16 +145,16 @@ namespace pga.core
 
         public async Task CreateUpdateDatabaseIfNecessaryAsync()
         {
-            if (!BoxesUpdatedDB.Contains(this.UUID))
+            if (!BoxesUpdatedDB.Contains(this.BoxUUID))
             {
                 await this.CreateUpdateDatabase();
-                BoxesUpdatedDB.Add(this.UUID);
+                BoxesUpdatedDB.Add(this.BoxUUID);
             }
         }
 
         public async Task CreateUpdateDatabase()
         {
-            var path = Init.BoxesPath + @"\" + this.UUID;
+            var path = Init.BoxesPath + @"\" + this.BoxUUID;
             string txt = null;
             using (var filehelper = new TextPlainFile(path + @"\version.json"))
             {
@@ -234,6 +234,8 @@ namespace pga.core
                     await permissionshelper.AddSubjectToPermissionAsync(p_create_msg, g_employees.RemoteUUID); //Un empleado puede enviar mensajes                    
                     //Se obtienen los usuarios empleados
                     var employees = await subjectshelper.GetEmployeesAsync();
+                    var db_messages = await this.DBLogic.ProxyStatement<DTOBoxMessage>();
+                    var list = await db_messages.selectAsync<DTOBoxMessage>();
                     foreach (var item in employees)
                     {
                         //Se asocia el empleado al grupo de empleados
@@ -268,11 +270,11 @@ namespace pga.core
         internal async Task<bool> SessionHasPermission(string action, string entity)
         {
             //Se comprueba si existe el box
-            var box_permision = PermissionsByBox.Where(reg => reg.BoxIdentifier == this.UUID).FirstOrDefault();
+            var box_permision = PermissionsByBox.Where(reg => reg.BoxIdentifier == this.BoxUUID).FirstOrDefault();
             if (box_permision == null)
             {
                 box_permision = new DTOBoxSessionPermisissions { 
-                    BoxIdentifier = this.UUID
+                    BoxIdentifier = this.BoxUUID
                 };
                 PermissionsByBox.Add(box_permision);
             }
@@ -323,7 +325,7 @@ namespace pga.core
         /// <returns></returns>
         private async Task<DTOBoxSessionPermissionsByIdentifier> LoadGroupsInThisSessionAsync()
         {
-            var actual_session_permissions = PermissionsByBox.Where(reg => reg.BoxIdentifier == this.UUID).FirstOrDefault().PermissionsBySession.Where(reg => reg.Session == this.AccessToken).FirstOrDefault();
+            var actual_session_permissions = PermissionsByBox.Where(reg => reg.BoxIdentifier == this.BoxUUID).FirstOrDefault().PermissionsBySession.Where(reg => reg.Session == this.AccessToken).FirstOrDefault();
             if (actual_session_permissions.UsersGroup == null || actual_session_permissions.EmployeesGroup == null)
             {
                 var permissions_groups = await this.GetBoxSubjectHelper().GetPermissionsGroupAsync();

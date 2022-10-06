@@ -77,7 +77,7 @@ namespace pga.core
                     await permissionshelper.AddPermissionAsync<DTOBoxMessage>(a,
                         new DTORecordPermission
                         {
-                            UUIDOwner = this.Box.UUID,
+                            UUIDOwner = (await this.Box.WhoIs()).UUID,
                             UUIDRecordPermissions = new DTOUUIDRecordPermision[] {
                                 record_permissions
                             }
