@@ -1,5 +1,6 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
+using es.dmoreno.utils.permissions;
 using es.dmoreno.utils.security;
 using pga.core.DTOsBox;
 using System;
@@ -58,7 +59,12 @@ namespace pga.core
             });
             if (employ != null)
             {
-                return await this.GetByIDAsync(employ.RefSubject);
+                var subject = await this.GetByIDAsync(employ.RefSubject);
+                using (var permissionhelper = new Permissions(this.Box.DataPath))
+                {
+                    await permissionhelper.CheckCanReadPermissionAsync(subject, (await this.Box.WhoIs()).UUID, true);
+                }
+                return subject;
             }
             else
             {

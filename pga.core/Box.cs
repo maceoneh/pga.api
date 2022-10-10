@@ -196,19 +196,22 @@ namespace pga.core
                     await permissionshelper.CreateTableDataPermissions<DTOBoxFile>();
                     await permissionshelper.CreateTableDataPermissions<DTOBoxAppointment>();
                     //Se crean los permisos
-                    var e_appointment = await permissionshelper.AddEntityAsync("appointment");
-                    var e_subject = await permissionshelper.AddEntityAsync("subject");
-                    var e_file = await permissionshelper.AddEntityAsync("file");
-                    var e_message = await permissionshelper.AddEntityAsync("message");
-                    var a_create = await permissionshelper.AddActionAsync("create");
-                    var a_modify = await permissionshelper.AddActionAsync("modify");
-                    var a_delete = await permissionshelper.AddActionAsync("delete");
+                    var e_appointment = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityAppointment);
+                    var e_subject = await permissionshelper.AddEntityAsync(BoxDefinitions.EntitySubject);
+                    var e_subject_root = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityAddSubjectRoot);
+                    var e_file = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityFile);                    
+                    var e_message = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityMessage);
+                    var a_create = await permissionshelper.AddActionAsync(BoxDefinitions.ActionCreate);
+                    var a_modify = await permissionshelper.AddActionAsync(BoxDefinitions.ActionModify);
+                    var a_delete = await permissionshelper.AddActionAsync(BoxDefinitions.ActionDelete);
                     var p_create_appointment = await permissionshelper.AddPermissionAsync(e_appointment, a_create, "crear una cita");
                     var p_modify_appointment = await permissionshelper.AddPermissionAsync(e_appointment, a_modify, "modificar una cita");
                     var p_delete_appointment = await permissionshelper.AddPermissionAsync(e_appointment, a_delete, "eliminar una cita");
                     var p_create_subject = await permissionshelper.AddPermissionAsync(e_subject, a_create, "crear un sujeto (cliente, proveedor, ...)");
                     var p_modify_subject = await permissionshelper.AddPermissionAsync(e_subject, a_modify, "modificar un sujeto (cliente, proveedor, ...)");
                     var p_delete_subject = await permissionshelper.AddPermissionAsync(e_subject, a_delete, "eliminar un sujeto (cliente, proveedor, ...)");
+                    var p_create_subject_root = await permissionshelper.AddPermissionAsync(e_subject_root, a_create, "asignar un sujeto al conjunto de sujetos que pueden ser root");
+                    var p_delete_subject_root = await permissionshelper.AddPermissionAsync(e_subject_root, a_delete, "eliminar un sujeto del conjunto de usuario root");
                     var p_create_file = await permissionshelper.AddPermissionAsync(e_file, a_create, "crear un expediente");
                     var p_modify_file = await permissionshelper.AddPermissionAsync(e_file, a_modify, "modificar un expediente");
                     var p_delete_file = await permissionshelper.AddPermissionAsync(e_file, a_delete, "eliminar un expediente");
@@ -241,15 +244,15 @@ namespace pga.core
                     }
 #if DEBUG
                     //Pruebas
-                    var db_messages = await this.DBLogic.ProxyStatement<DTOBoxMessage>();
-                    var list = await db_messages.selectAsync<DTOBoxMessage>();
-                    foreach (var item in employees)
-                    {
-                        for (int i = 0; i < list.Count; i++)
-                        {
-                            var a = await permissionshelper.GetDataPermission(list[i], item.UUID);
-                        }
-                    }
+                    //var db_messages = await this.DBLogic.ProxyStatement<DTOBoxMessage>();
+                    //var list = await db_messages.selectAsync<DTOBoxMessage>();
+                    //foreach (var item in employees)
+                    //{
+                    //    for (int i = 0; i < list.Count; i++)
+                    //    {
+                    //        var a = await permissionshelper.GetDataPermission(list[i], item.UUID);
+                    //    }
+                    //}
 #endif
                 }
             }

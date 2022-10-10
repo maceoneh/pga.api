@@ -1,5 +1,6 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
+using es.dmoreno.utils.permissions;
 using es.dmoreno.utils.security;
 using pga.core.DTOsBox;
 using SQLitePCL;
@@ -153,6 +154,29 @@ namespace pga.core
                     Type = EBoxMessageType.CreateAppointment,
                     Message = ""
                 });
+                //Se agregan los permisos al registro
+                var users_group = await this.Box.GetUsersGroupAsync();
+                DTOUUIDRecordPermision? record_permissions = null;
+                if (users_group != null)
+                {
+                    record_permissions = new DTOUUIDRecordPermision
+                    {
+                        UUID = users_group.UUID,
+                        CanRead = true,
+                        CanWrite = false
+                    };
+                }
+                using (var permissionshelper = new Permissions(this.Box.DataPath))
+                {
+                    await permissionshelper.AddDataPermissionAsync<DTOBoxFile>(f,
+                        new DTORecordPermission
+                        {
+                            UUIDOwner = (await this.Box.WhoIs()).UUID,
+                            UUIDRecordPermissions = new DTOUUIDRecordPermision[] {
+                                record_permissions
+                            }
+                        });
+                }
                 return f;
             }
             else
@@ -266,6 +290,11 @@ namespace pga.core
                     appointment.EmployeesInAppointment = employees_in_appointment;
                 }
             }
+            //Se comprueba si el usuario tiene permisos para acceder al registro
+            using (var permissionshelper = new Permissions(this.Box.DataPath))
+            {
+                await permissionshelper.CheckCanReadPermissionAsync(appointment, (await this.Box.WhoIs()).UUID, true);
+            }
             return appointment;
         }
 
@@ -277,7 +306,8 @@ namespace pga.core
         public async Task<bool> AddStatusDownloadedAsync(DTOBoxAppointment a)
         {
             var action_subject = await this.Box.WhoIs();
-            return await this.Box.GetBoxMessageHelper().AddAsync(new DTOBoxMessage { 
+            return await this.Box.GetBoxMessageHelper().AddAsync(new DTOBoxMessage
+            {
                 Flow = EBoxMessageFlow.In,
                 RefAppointment = a.ID,
                 RefFile = a.RefFile,
@@ -295,7 +325,7 @@ namespace pga.core
         public async Task<bool> AddMessageToAppointmentAsync(DTOBoxAppointment a, DTOBoxMessage msg)
         {
             await this.Box.CheckPermissionAndFire("create", "message");
-            var action_subject = await this.Box.WhoIs();            
+            var action_subject = await this.Box.WhoIs();
             msg.RefAppointment = a.ID;
             msg.RefFile = a.RefFile;
             msg.RefSubject = action_subject.ID;
