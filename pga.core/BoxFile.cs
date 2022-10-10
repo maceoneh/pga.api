@@ -324,7 +324,7 @@ namespace pga.core
         /// <returns></returns>
         public async Task<bool> AddMessageToAppointmentAsync(DTOBoxAppointment a, DTOBoxMessage msg)
         {
-            await this.Box.CheckPermissionAndFire("create", "message");
+            await this.Box.CheckPermissionAndFireAsync("create", "message");
             var action_subject = await this.Box.WhoIs();
             msg.RefAppointment = a.ID;
             msg.RefFile = a.RefFile;

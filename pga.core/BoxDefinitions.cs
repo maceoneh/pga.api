@@ -37,6 +37,11 @@ namespace pga.core
         public const string EntityAddSubjectRoot = "subject_root";
 
         /// <summary>
+        /// Entidad que representa al grupo de sujetos que son empleados en el buzón
+        /// </summary>
+        public const string EntityAddSubjectEmploy = "subject_employ";
+
+        /// <summary>
         /// Entidad que representa los expedientes almacenados en el buzon
         /// </summary>
         public const string EntityFile = "file";

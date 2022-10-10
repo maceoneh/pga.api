@@ -141,37 +141,45 @@ namespace pga.core
         {
             if (t == EBoxSubjectType.Root)
             {
-                var db_subjectroot = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectRoot>();
-                var root = await db_subjectroot.FirstIfExistsAsync<DTOBoxSubjectRoot>(new StatementOptions
+                if (this.Box.MaintenanceMode || await this.Box.IsRoot())
                 {
-                    Filters = new List<Filter> {
+                    var db_subjectroot = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectRoot>();
+                    var root = await db_subjectroot.FirstIfExistsAsync<DTOBoxSubjectRoot>(new StatementOptions
+                    {
+                        Filters = new List<Filter> {
                         new Filter { Name = DTOBoxSubjectRoot.FilterRefSubject, ObjectValue = s.ID, Type = FilterType.Equal }
                     }
-                });
-                if (root == null)
-                {
-                    if (o != null)
-                    {
-                        root = o as DTOBoxSubjectRoot;
-                    }
+                    });
                     if (root == null)
                     {
-                        root = new DTOBoxSubjectRoot
+                        if (o != null)
                         {
-                            RefSubject = s.ID,
-                            UserMD5 = MD5Utils.GetHash(DTOBoxSubjectRoot.NoUsableUser),
-                            PasswordMD5 = MD5Utils.GetHash(DTOBoxSubjectRoot.NoUsablePassword)
-                        };
+                            root = o as DTOBoxSubjectRoot;
+                        }
+                        if (root == null)
+                        {
+                            root = new DTOBoxSubjectRoot
+                            {
+                                RefSubject = s.ID,
+                                UserMD5 = MD5Utils.GetHash(DTOBoxSubjectRoot.NoUsableUser),
+                                PasswordMD5 = MD5Utils.GetHash(DTOBoxSubjectRoot.NoUsablePassword)
+                            };
+                        }
+                        else
+                        {
+                            root.RefSubject = s.ID;
+                        }
+                        return await db_subjectroot.insertAsync(root);
                     }
-                    else
-                    {
-                        root.RefSubject = s.ID;
-                    }
-                    return await db_subjectroot.insertAsync(root);
+                }
+                else
+                {
+                    throw new PermissionException("This action can only be performed in maintenance mode or by a user with high privileges");
                 }
             }
             else if (t == EBoxSubjectType.Employ)
             {
+                await this.Box.CheckPermissionAndFireAsync(BoxDefinitions.ActionCreate, BoxDefinitions.EntityAddSubjectEmploy);
                 var db_subjectemploy = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
                 var employ = await db_subjectemploy.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions
                 {
@@ -202,30 +210,38 @@ namespace pga.core
             }
             else if (t == EBoxSubjectType.PermissionGroup)
             {
-                var db_subjectgroup = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectPermissionGroup>();
-                var permissiongroup = await db_subjectgroup.FirstIfExistsAsync<DTOBoxSubjectPermissionGroup>(new StatementOptions { 
-                    Filters = new List<Filter> { 
+                if (this.Box.MaintenanceMode)
+                {
+                    var db_subjectgroup = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectPermissionGroup>();
+                    var permissiongroup = await db_subjectgroup.FirstIfExistsAsync<DTOBoxSubjectPermissionGroup>(new StatementOptions
+                    {
+                        Filters = new List<Filter> {
                         new Filter { Name = DTOBoxSubjectPermissionGroup.FilterRefSubject, ObjectValue = s.ID, Type = FilterType.Equal }
                     }
-                });
-                if (permissiongroup == null)
-                {
-                    if (o != null)
-                    {
-                        permissiongroup = o as DTOBoxSubjectPermissionGroup;
-                    }
+                    });
                     if (permissiongroup == null)
                     {
-                        permissiongroup = new DTOBoxSubjectPermissionGroup
+                        if (o != null)
                         {
-                            RefSubject = s.ID
-                        };
+                            permissiongroup = o as DTOBoxSubjectPermissionGroup;
+                        }
+                        if (permissiongroup == null)
+                        {
+                            permissiongroup = new DTOBoxSubjectPermissionGroup
+                            {
+                                RefSubject = s.ID
+                            };
+                        }
+                        else
+                        {
+                            permissiongroup.RefSubject = s.ID;
+                        }
+                        return await db_subjectgroup.insertAsync(permissiongroup);
                     }
-                    else
-                    { 
-                        permissiongroup.RefSubject = s.ID;
-                    }
-                    return await db_subjectgroup.insertAsync(permissiongroup);
+                }
+                else
+                {
+                    throw new PermissionException("This action can only be performed in maintenance mode");
                 }
             }
 
@@ -239,6 +255,7 @@ namespace pga.core
         /// <returns></returns>
         public async Task<DTOBoxSubject> CreateSubjectAsync(DTOBoxSubject s)
         {
+            await this.Box.CheckPermissionAndFireAsync(BoxDefinitions.ActionCreate, BoxDefinitions.EntitySubject);
             var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
             s.UUID = Guid.NewGuid().ToString();
             await db_subjects.insertAsync(s);
@@ -258,6 +275,7 @@ namespace pga.core
                 s.UUID = Guid.NewGuid().ToString();
                 await db_subjects.insertAsync(s);                
             }
+            await this.Box.CheckPermissionAndFirAsynce(s);
             return s;
         }
 

@@ -16,6 +16,8 @@ namespace pga.core
 {
     public class Box : IDisposable
     {
+        public bool MaintenanceMode { get; internal set; }
+
         /// <summary>
         /// Buzones con la estructura actualizada
         /// </summary>
@@ -113,6 +115,8 @@ namespace pga.core
                 });
                 this._dispose_db_logic = true;
             }
+            this.MaintenanceMode = string.IsNullOrEmpty(this.AccessToken);
+            
         }
 
         public void BuildIfNecessary()
@@ -199,6 +203,7 @@ namespace pga.core
                     var e_appointment = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityAppointment);
                     var e_subject = await permissionshelper.AddEntityAsync(BoxDefinitions.EntitySubject);
                     var e_subject_root = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityAddSubjectRoot);
+                    var e_subject_employ = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityAddSubjectEmploy);
                     var e_file = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityFile);                    
                     var e_message = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityMessage);
                     var a_create = await permissionshelper.AddActionAsync(BoxDefinitions.ActionCreate);
@@ -212,6 +217,8 @@ namespace pga.core
                     var p_delete_subject = await permissionshelper.AddPermissionAsync(e_subject, a_delete, "eliminar un sujeto (cliente, proveedor, ...)");
                     var p_create_subject_root = await permissionshelper.AddPermissionAsync(e_subject_root, a_create, "asignar un sujeto al conjunto de sujetos que pueden ser root");
                     var p_delete_subject_root = await permissionshelper.AddPermissionAsync(e_subject_root, a_delete, "eliminar un sujeto del conjunto de usuario root");
+                    var p_create_subject_employ = await permissionshelper.AddPermissionAsync(e_subject_employ, a_create, "asignar un sujeto al conjunto de sujetos que pueden ser empleado");
+                    var p_delete_subject_employ = await permissionshelper.AddPermissionAsync(e_subject_employ, a_delete, "eliminar un sujeto del conjunto de usuarios que son empleados");
                     var p_create_file = await permissionshelper.AddPermissionAsync(e_file, a_create, "crear un expediente");
                     var p_modify_file = await permissionshelper.AddPermissionAsync(e_file, a_modify, "modificar un expediente");
                     var p_delete_file = await permissionshelper.AddPermissionAsync(e_file, a_delete, "eliminar un expediente");
@@ -282,6 +289,8 @@ namespace pga.core
         /// <returns></returns>
         internal async Task<bool> SessionHasPermission(string action, string entity)
         {
+            //Si el BOX se encuentra en modo mantenimiento se permite la accion
+            if (this.MaintenanceMode) { return true; }
             //Se comprueba si existe el box
             var box_permision = PermissionsByBox.Where(reg => reg.BoxIdentifier == this.BoxUUID).FirstOrDefault();
             if (box_permision == null)
@@ -323,12 +332,25 @@ namespace pga.core
         /// <param name="action"></param>
         /// <param name="entity"></param>
         /// <returns></returns>
-        internal async Task CheckPermissionAndFire(string action, string entity)
+        internal async Task CheckPermissionAndFireAsync(string action, string entity)
         {
             
             if (!await this.SessionHasPermission(action, entity))
             {
                 throw new PermissionException();
+            }
+        }
+
+        /// <summary>
+        /// Comprueba si el usuario actual tiene privilegios para acceder al registro
+        /// </summary>
+        /// <param name="registry"></param>
+        /// <returns></returns>
+        internal async Task CheckPermissionAndFirAsynce(object registry)
+        {
+            using (var permissionhelper = new Permissions(this.DataPath))
+            {
+                await permissionhelper.CheckCanReadPermissionAsync(registry, (await this.WhoIs()).UUID, true);
             }
         }
 
