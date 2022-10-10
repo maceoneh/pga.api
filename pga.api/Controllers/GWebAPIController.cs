@@ -155,6 +155,8 @@ namespace pga.api.Controllers
                         r.Response = false;
                     }
                     break;
+                case "GETQUERY":
+                    break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
             }
