@@ -324,7 +324,7 @@ namespace pga.core
         /// <returns></returns>
         public async Task<bool> AddMessageToAppointmentAsync(DTOBoxAppointment a, DTOBoxMessage msg)
         {
-            await this.Box.CheckPermissionAndFireAsync("create", "message");
+            await this.Box.CheckPermissionAndFireAsync(BoxDefinitions.ActionCreate, BoxDefinitions.EntityMessage);
             var action_subject = await this.Box.WhoIs();
             msg.RefAppointment = a.ID;
             msg.RefFile = a.RefFile;
@@ -335,6 +335,23 @@ namespace pga.core
             }
             msg.Flow = EBoxMessageFlow.In;
             return await this.Box.GetBoxMessageHelper().AddAsync(msg, fill_date: false);
+        }
+
+        public async Task<List<DTOBoxAppointment>> GetAppointmentsByEmploy(string uuid)
+        {
+            var subjecthelper = this.Box.GetBoxSubjectHelper();
+            //Se obtiene el sujeto
+            var subject = await subjecthelper.GetByUUIDAsync(uuid);
+            //Se comprueba si es un empleado
+            if (await subjecthelper.IsEmployAsync(subject))
+            {
+                //Se obtienen los appointments con los que esta asociado
+                var db_employ_in_appointment = await this.Box.DBLogic.ProxyStatement<DTOBoxEmployInAppointment>();
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

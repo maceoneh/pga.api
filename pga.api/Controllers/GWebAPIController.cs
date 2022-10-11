@@ -12,6 +12,7 @@ using pga.core.DTOsBox;
 using System.Buffers;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -156,6 +157,15 @@ namespace pga.api.Controllers
                     }
                     break;
                 case "GETQUERY":
+                    var infoquery = parameters.Deserialize<DTORequestGWebAPIGetQuery>();
+                    if (infoquery != null)
+                    {
+                        r.Response = await this.GetQueryAsync(request.Provider, request.Token, infoquery);
+                    }
+                    else
+                    {
+                        r.Response = null;
+                    }
                     break;
                 default:
                     throw new ArgumentException("Action '" + request.Action + "' not exists");
@@ -164,6 +174,21 @@ namespace pga.api.Controllers
             stopwatch.Stop();
             r.ExecutionTime = stopwatch.Elapsed.TotalSeconds;
             return r;
+        }
+
+        private async Task<DTOResponseGWebAPIGetQuery> GetQueryAsync(string uuid_provider, string token, DTORequestGWebAPIGetQuery infoquery)
+        {
+            using (var boxhelper = new Box(uuid_provider, token))
+            {
+                if (infoquery.Query == "workorderbyemploy")
+                {
+                    return new DTOResponseGWebAPIGetQuery { };
+                }
+                else
+                {
+                    throw new PGAAPIException() { StatusCode = (int)HttpStatusCode.NotFound, StatusMessage = "Entity " + infoquery.Query + " not exists" };
+                }
+            }
         }
 
         private async Task<bool> ReceiveMessage(string uuid_provider, string token, DTORequestGWebAPISendMessage msg)

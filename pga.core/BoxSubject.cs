@@ -349,5 +349,36 @@ namespace pga.core
                 }
             }
         }
+
+        /// <summary>
+        /// Obtiene un sujeto por UUID
+        /// </summary> 
+        /// <param name="uuid"></param>
+        /// <returns></returns>
+        internal async Task<DTOBoxSubject> GetByUUIDAsync(string uuid)
+        {
+            var db_subject = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
+            return await db_subject.FirstIfExistsAsync<DTOBoxSubject>(new StatementOptions { 
+                Filters = new List<Filter> { 
+                    new Filter { Name = DTOBoxSubject.FilterUUID, ObjectValue = uuid, Type = FilterType.Equal }
+                }
+            });
+        }
+
+        /// <summary>
+        /// Indica si el sujeto indicado es un empleado
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+        internal async Task<bool> IsEmployAsync(DTOBoxSubject s)
+        {
+            var db_subject_employ = await this.Box.DBLogic.ProxyStatement<DTOBoxSubjectEmploy>();
+            var employ = await db_subject_employ.FirstIfExistsAsync<DTOBoxSubjectEmploy>(new StatementOptions { 
+                Filters = new List<Filter> { 
+                    new Filter { Name = DTOBoxSubjectEmploy.FilterRefSubject, ObjectValue = s.ID, Type = FilterType.Equal }
+                }
+            });
+            return employ != null;
+        }
     }
 }
