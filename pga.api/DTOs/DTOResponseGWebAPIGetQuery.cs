@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using pga.core.DTOsBox;
+using System.Text.Json.Serialization;
 
 namespace pga.api.DTOs
 {
@@ -102,6 +103,47 @@ namespace pga.api.DTOs
 
         [JsonPropertyName("descphase")]
         public string DescPhase { get; set; }
+
+        /// <summary>
+        /// Realiza la carga a través de un DTOBoxAppointment
+        /// </summary>
+        /// <param name="a"></param>
+        public DTOResponseGWebAPIGetQueryWorkOrderByEmploy(DTOBoxAppointment a)
+        {
+            this.AgreedAppointment = a.Agreed;
+            this.AppointmentDate = a.DateFrom.ToString("dd/MM/yyyy");
+            this.AssistanceNumber = null;
+            this.ClaimInternalCode = null;
+            this.ClaimNumber = null;
+            this.Code = null;
+            this.DescGuild = a.GuildDescription;
+            this.DescPhase = null;
+            this.DescProvider = null;
+            this.Description = a.Description;
+            this.Hour = a.DateFrom.ToString("HH:mm");
+            this.IDAdministrator = int.MinValue;
+            this.IDFirm = int.MinValue;
+            this.IDClaim = int.MinValue;
+            this.IdCompany = int.MinValue;
+            this.IDGuild = int.MinValue;
+            this.IDMasterDetail = int.MinValue;
+            this.IdRepairer = int.MinValue;
+            this.IdSubCompany = int.MinValue;
+            this.InsuredAddress = null;
+            this.InsuredDNI = null;
+            this.InsuredMail = null;
+            this.InsuredName = null;
+            this.InsuredPopulation = null;
+            this.InsuredPostalCode = null;
+            this.InsuredProvince = null;
+            this.InsuredTel1 = null;
+            this.InsuredTel2 = null;
+            this.InsuredTel3 = null;
+            this.InsuredTelFax = null;
+            this.PGAMobileStatus = 2;
+            this.PolicyNumber = null;
+            this.UrgentClaim = false;
+        }
     }
 
     public class DTOResponseGWebAPIGetQuery

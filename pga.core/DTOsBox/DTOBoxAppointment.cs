@@ -12,8 +12,10 @@ namespace pga.core.DTOsBox
     {
         public const string TAG = "DTOBoxAppointment";
         public const string FilterExternalID = TAG + "ExternalID";
+        public const string FilterID = TAG + "ID";
         public const string IdxExternalID = TAG + "ExternalID";
 
+        [Filter(Name = FilterID)]
         [Field(FieldName = "id", IsPrimaryKey = true, IsAutoincrement = true, Type = ParamType.Int32)]
         internal int ID { get; set; }
 
@@ -48,9 +50,6 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "agreed", Type = ParamType.Boolean, DefaultValue = false)]
         public bool Agreed { get; set; }
 
-        [Field(FieldName = "status", Type = ParamType.Int32)]
-        public EBoxAppointmentStatus Status { get; set; } = EBoxAppointmentStatus.InProgress;
-
         public string IDRecord => this.ID.ToString();
 
         internal DTOBoxAppointment CopyTo(DTOBoxAppointment a)
@@ -62,8 +61,7 @@ namespace pga.core.DTOsBox
             a.GuildDescription = this.GuildDescription;
             a.ID = this.ID;
             a.RefFile = this.RefFile;
-            a.RefReceiver = this.RefReceiver;
-            a.Status = this.Status;
+            a.RefReceiver = this.RefReceiver;            
             a.UUID = this.UUID;
             a.EmployeesInAppointment = new List<DTOBoxEmployInAppointment>(this.EmployeesInAppointment.Count);
             foreach (var item in this.EmployeesInAppointment)
@@ -72,5 +70,15 @@ namespace pga.core.DTOsBox
             }
             return a;
         }
+    }
+
+    [Table(Name = "appointments_archive", FilePerTable = true)]
+    public class DTOBoxAppointmentArchive : DTOBoxAppointment
+    {
+        [Filter(Name = FilterID)]
+        [Field(FieldName = "id", IsPrimaryKey = true, IsAutoincrement = false, Type = ParamType.Int32)]
+        internal new int ID { get; set; }
+
+        public new List<DTOBoxEmployInAppointmentArchive>? EmployeesInAppointment { get; set; } = null;
     }
 }

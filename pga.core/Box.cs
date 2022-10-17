@@ -173,7 +173,9 @@ namespace pga.core
             if (update)
             {
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxAppointment>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxAppointmentArchive>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxEmployInAppointment>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxEmployInAppointmentArchive>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxMasterData>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubject>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxSubjectRoot>();
@@ -199,6 +201,7 @@ namespace pga.core
                     await permissionshelper.CreateTableDataPermissions<DTOBoxSubject>();
                     await permissionshelper.CreateTableDataPermissions<DTOBoxFile>();
                     await permissionshelper.CreateTableDataPermissions<DTOBoxAppointment>();
+                    await permissionshelper.CreateTableDataPermissions<DTOBoxAppointmentArchive>();
                     //Se crean los permisos
                     var e_appointment = await permissionshelper.AddEntityAsync(BoxDefinitions.EntityAppointment);
                     var e_subject = await permissionshelper.AddEntityAsync(BoxDefinitions.EntitySubject);

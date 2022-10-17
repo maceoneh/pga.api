@@ -68,7 +68,6 @@ namespace pga.api.Controllers
                     DateFrom = a.DateFrom,
                     DateTo = a.DateFrom.AddHours(1),
                     Description = a.Description,
-                    Status = EBoxAppointmentStatus.InProgress,
                     GuildDescription = a.Guild,
                     EmployeesInAppointment = employees
                 }, f);

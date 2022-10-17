@@ -3,9 +3,11 @@ using es.dmoreno.utils.dataaccess.filters;
 using es.dmoreno.utils.permissions;
 using es.dmoreno.utils.security;
 using pga.core.DTOsBox;
+using pga.core.Exceptions;
 using SQLitePCL;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace pga.core
@@ -337,7 +339,7 @@ namespace pga.core
             return await this.Box.GetBoxMessageHelper().AddAsync(msg, fill_date: false);
         }
 
-        public async Task<List<DTOBoxAppointment>> GetAppointmentsByEmploy(string uuid)
+        public async Task<List<DTOBoxAppointment>> GetAppointmentsByEmployAsync(string uuid, bool use_archive)
         {
             var subjecthelper = this.Box.GetBoxSubjectHelper();
             //Se obtiene el sujeto
@@ -347,10 +349,100 @@ namespace pga.core
             {
                 //Se obtienen los appointments con los que esta asociado
                 var db_employ_in_appointment = await this.Box.DBLogic.ProxyStatement<DTOBoxEmployInAppointment>();
+                var employ_in_appointment = await db_employ_in_appointment.selectAsync<DTOBoxEmployInAppointment>(new StatementOptions {
+                    Filters = new List<Filter> {
+                        new Filter { Name = DTOBoxEmployInAppointment.FilterRefEmploy, ObjectValue = subject.ID, Type = FilterType.Equal }
+                    }
+                });
+                var ids = new List<int>();
+                foreach (var item in employ_in_appointment)
+                {
+                    ids.Add(item.RefAppointment);
+                }
+                var db_appointmets = await this.Box.DBLogic.ProxyStatement<DTOBoxAppointment>();
+                var appointments = await db_appointmets.selectAsync<DTOBoxAppointment>(new StatementOptions
+                {
+                    Filters = new List<Filter> {
+                        new Filter { Name = DTOBoxAppointment.FilterID, ObjectValue = ids, Type = FilterType.In }
+                    }
+                });
+                //Se asocian los appointments a los empleados
+                foreach (var item in employ_in_appointment)
+                {
+                    var appointment = appointments.Where(reg => reg.ID == item.RefAppointment).FirstOrDefault();
+                    if (appointment != null)
+                    {
+                        if (appointment.EmployeesInAppointment == null)
+                        {
+                            appointment.EmployeesInAppointment = new List<DTOBoxEmployInAppointment>();
+                        }
+                        appointment.EmployeesInAppointment.Add(item);
+                    }
+                }
+                //Se eliminan los resultados que no pertenecen al usuario que hace la consulta
+                using (var permissionhelper = new Permissions(this.Box.DataPath))
+                {
+                    appointments = await permissionhelper.FilterByDataPermission<DTOBoxAppointment>(appointments, (await this.Box.WhoIs()).UUID);
+                }
+                if (use_archive)
+                {
+                    var db_employ_in_appointment_archive = await this.Box.DBLogic.ProxyStatement<DTOBoxEmployInAppointmentArchive>();
+                    var employ_in_appointment_archive = await db_employ_in_appointment_archive.selectAsync<DTOBoxEmployInAppointmentArchive>(new StatementOptions
+                    {
+                        Filters = new List<Filter> {
+                        new Filter { Name = DTOBoxEmployInAppointment.FilterRefEmploy, ObjectValue = subject.ID, Type = FilterType.Equal }
+                    }
+                    });
+                    ids.Clear();
+                    foreach (var item in employ_in_appointment_archive)
+                    {
+                        ids.Add(item.RefAppointment);
+                    }
+                    var db_appointmets_archive = await this.Box.DBLogic.ProxyStatement<DTOBoxAppointmentArchive>();
+                    var appointments_archive = await db_appointmets_archive.selectAsync<DTOBoxAppointmentArchive>(new StatementOptions { 
+                        Filters = new List<Filter> { 
+                            new Filter { Name = DTOBoxAppointmentArchive.FilterID, ObjectValue = ids, Type = FilterType.In }
+                        }
+                    });
+                    //Se asocian los appointments a los empleados
+                    foreach (var item in employ_in_appointment_archive)
+                    {
+                        var appointment = appointments_archive.Where(reg => reg.ID == item.RefAppointment).FirstOrDefault();
+                        if (appointment != null)
+                        {
+                            if (appointment.EmployeesInAppointment == null)
+                            {
+                                appointment.EmployeesInAppointment = new List<DTOBoxEmployInAppointmentArchive>();
+                            }
+                            appointment.EmployeesInAppointment.Add(item);
+                        }
+                    }
+                    //Se eliminan los resultados que no pertenecen al usuario que hace la consulta
+                    using (var permissionhelper = new Permissions(this.Box.DataPath))
+                    {
+                       appointments_archive = await permissionhelper.FilterByDataPermission<DTOBoxAppointmentArchive>(appointments_archive, (await this.Box.WhoIs()).UUID);
+                    }
+                    //Se agregan al listado principal
+                    appointments.AddRange(appointments_archive);
+                }
+                //Se carga el subject correspodiente
+                var employees = await subjecthelper.GetEmployeesAsync();
+                foreach (var appointment in appointments)
+                {
+                    if (appointment.EmployeesInAppointment != null)
+                    {
+                        foreach (var item in appointment.EmployeesInAppointment)
+                        {
+                            item.Employ = employees.Where(reg => reg.ID == item.RefEmploy).FirstOrDefault().CopyTo(new DTOBoxSubject());
+                        }
+                    }
+                }
+
+                return appointments;
             }
             else
             {
-                return null;
+                throw new RegisterNotExistsException("Not exists employ with UUID " + uuid);
             }
         }
     }

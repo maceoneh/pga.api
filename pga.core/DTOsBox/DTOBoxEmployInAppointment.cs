@@ -11,13 +11,17 @@ namespace pga.core.DTOsBox
     {
         public const string TAG = "DTOBoxEmployInAppointment";
         internal const string FilterRefAppointment = TAG + "RefAppointment";
+        internal const string FilterRefEmploy = TAG + "RefEmploy";
         internal const string IdxRefAppointment = TAG + "RefAppointment";
+        internal const string IdxRefEmploy = TAG + "RefEmploy";
 
         [Index(Name = IdxRefAppointment)]
         [Filter(Name = FilterRefAppointment)]
         [Field(FieldName = "ref_appointment", IsAutoincrement = false, IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int RefAppointment { get; set; } = int.MinValue;
 
+        [Index(Name = IdxRefEmploy)]
+        [Filter(Name = FilterRefEmploy)]
         [Field(FieldName = "ref_employ", IsAutoincrement = false, IsPrimaryKey = true, Type = ParamType.Int32)]
         internal int RefEmploy { get; set; } = int.MinValue;
         public DTOBoxSubject? Employ { get; set; } = null;
@@ -36,5 +40,11 @@ namespace pga.core.DTOsBox
             }
             return e;
         }
+    }
+
+    [Table(Name = "employees_in_appointment_archive", FilePerTable = true)]
+    public class DTOBoxEmployInAppointmentArchive : DTOBoxEmployInAppointment
+    { 
+        
     }
 }
