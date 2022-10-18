@@ -139,6 +139,21 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "population", Type = ParamType.String, AllowNull = true)]
         public string? Population { get; set; }
 
+        [Field(FieldName = "phone1", Type = ParamType.String, AllowNull = true)]
+        public string? Phone1 { get; set; }
+
+        [Field(FieldName = "phone2", Type = ParamType.String, AllowNull = true)]
+        public string? Phone2 { get; set; }
+
+        [Field(FieldName = "phone3", Type = ParamType.String, AllowNull = true)]
+        public string? Phone3 { get; set; }
+
+        [Field(FieldName = "phone_fax", Type = ParamType.String, AllowNull = true)]
+        public string? PhoneFax { get; set; }
+
+        [Field(FieldName = "urgent", Type = ParamType.Boolean, DefaultValue = false)]
+        public bool Urgent { get; set; }
+
         public string IDRecord => this.ID.ToString();
 
         internal DTOBoxFile CopyTo(DTOBoxFile f)
@@ -158,6 +173,11 @@ namespace pga.core.DTOsBox
             f.RefReceiver = this.RefReceiver;
             f.Status = this.Status;
             f.UUID = this.UUID;
+            f.Phone1 = this.Phone1;
+            f.Phone2 = this.Phone2;
+            f.Phone3 = this.Phone3;
+            f.PhoneFax = this.PhoneFax;
+            f.Urgent = this.Urgent;
             if (this.Receiver != null)
             {
                 f.Receiver = this.Receiver.CopyTo(new DTOBoxSubject());

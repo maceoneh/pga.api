@@ -339,7 +339,76 @@ namespace pga.core
             return await this.Box.GetBoxMessageHelper().AddAsync(msg, fill_date: false);
         }
 
-        public async Task<List<DTOBoxAppointment>> GetAppointmentsByEmployAsync(string uuid, bool use_archive)
+        private async Task<List<DTOBoxAppointment>> CompleteAppointments(List<DTOBoxAppointment> l)
+        {
+            //Se obtiene el listado de expedientes relacionados con los appointments
+            var ids = new List<int>(l.Count);
+            foreach (var item in l)
+            {
+                ids.Add(item.RefFile);
+            }
+            //Se carga el listado de expedientes al que se hace referencia
+            var db_files = await this.Box.DBLogic.ProxyStatement<DTOBoxFile>();
+            var files = await db_files.selectAsync<DTOBoxFile>(new StatementOptions { 
+                Filters = new List<Filter> { 
+                    new Filter { Name = DTOBoxFile.FilterID, ObjectValue = ids, Type = FilterType.In }
+                }
+            });
+            //Se carga la información extendida
+            var result = new List<DTOBoxAppointment>(l.Count);
+            foreach (var item in l)
+            {
+                var file = files.Where(reg => reg.ID == item.RefFile).FirstOrDefault();
+                var new_appointment = new DTOBoxAppointmentExtend(item);
+                if (file != null)
+                {
+                    new_appointment.DescPhase = "";
+                    if (file.Receiver != null)
+                    {
+                        new_appointment.InsuredDNI = "";
+                        new_appointment.InsuredMail = file.Receiver.eMail;
+                        new_appointment.InsuredName = file.Receiver.Name;                        
+                    }
+                    else
+                    {
+                        new_appointment.InsuredDNI = "";
+                        new_appointment.InsuredMail = "";
+                        new_appointment.InsuredName = "";                        
+                    }
+                    if (file.Provider != null)
+                    {
+                        new_appointment.DescProvider = file.Provider.Name;
+                                           
+                    }                    
+                    if (file.Intermediary != null)
+                    {
+                        new_appointment.DescProvider = file.Intermediary.Name;
+                    }
+                    new_appointment.IDAdministrator = int.MinValue;
+                    new_appointment.IDClaim = int.MinValue;
+                    new_appointment.IdCompany = int.MinValue;
+                    new_appointment.IDFirm = int.MinValue;
+                    new_appointment.IDGuild = int.MinValue;
+                    new_appointment.IDMasterDetail = int.MinValue;
+                    new_appointment.IdRepairer = int.MinValue;
+                    new_appointment.IdSubCompany = int.MinValue;
+                    new_appointment.InsuredAddress = file.Address;                    
+                    new_appointment.InsuredPopulation = file.Population;                    
+                    new_appointment.InsuredProvince = file.Province;
+                    new_appointment.InsuredPostalCode = file.PostalCode;
+                    new_appointment.InsuredTel1 = file.Phone1;
+                    new_appointment.InsuredTel2 = file.Phone2;
+                    new_appointment.InsuredTel3 = file.Phone3;
+                    new_appointment.InsuredTelFax = file.Phone3;
+                    new_appointment.PolicyNumber = file.Policy;
+                    new_appointment.UrgentClaim = file.Urgent;
+                }
+                result.Add(new_appointment);
+            }
+            return result;
+        }
+
+        public async Task<List<DTOBoxAppointment>> GetAppointmentsByEmployAsync(string uuid, bool use_archive, bool extend)
         {
             var subjecthelper = this.Box.GetBoxSubjectHelper();
             //Se obtiene el sujeto

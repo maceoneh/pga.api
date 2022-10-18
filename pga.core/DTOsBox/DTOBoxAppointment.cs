@@ -81,4 +81,36 @@ namespace pga.core.DTOsBox
 
         public new List<DTOBoxEmployInAppointmentArchive>? EmployeesInAppointment { get; set; } = null;
     }
+
+    public class DTOBoxAppointmentExtend : DTOBoxAppointment
+    {
+        public string? DescPhase { get; set; }
+        public string? DescProvider { get; set; }
+        public string? InsuredAddress { get; set; }
+        public string? InsuredDNI { get; set; }
+        public string? InsuredMail { get; set; }
+        public string? InsuredName { get; set; }
+        public string? InsuredPopulation { get; set; }
+        public string? InsuredPostalCode { get; set; }
+        public string? InsuredProvince { get; set; }
+        public string? InsuredTel1 { get; set; }
+        public string? InsuredTel2 { get; set; }
+        public string? InsuredTel3 { get; set; }
+        public string? InsuredTelFax { get; set; }
+        public string? PolicyNumber { get; set; }
+        public int IDAdministrator { get; set; }
+        public int IDFirm { get; set; }
+        public int IDClaim { get; set; }
+        public int IdCompany { get; set; }
+        public int IdSubCompany { get; set; }
+        public int IDGuild { get; set; }
+        public int IDMasterDetail { get; set; }
+        public int IdRepairer { get; set; }
+        public bool UrgentClaim { get; set; }
+
+        public DTOBoxAppointmentExtend(DTOBoxAppointment a)
+        {
+            a.CopyTo(this);
+        }
+    }
 }
