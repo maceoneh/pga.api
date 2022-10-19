@@ -214,7 +214,7 @@ namespace pga.core
         {
             //Se completa información
             a.UUID = Guid.NewGuid().ToString();
-            a.ExternalID = Token.getRandomNumber();
+            //a.ExternalID = Token.getRandomID();
             a.RefFile = f.ID;
             a.RefReceiver = f.RefReceiver;
             //Se agregan registros en la base de datos
@@ -384,16 +384,10 @@ namespace pga.core
                     {
                         new_appointment.DescProvider = file.Intermediary.Name;
                     }
-                    new_appointment.IDAdministrator = int.MinValue;
-                    new_appointment.IDClaim = int.MinValue;
-                    new_appointment.IdCompany = int.MinValue;
-                    new_appointment.IDFirm = int.MinValue;
-                    new_appointment.IDGuild = int.MinValue;
-                    new_appointment.IDMasterDetail = int.MinValue;
-                    new_appointment.IdRepairer = int.MinValue;
-                    new_appointment.IdSubCompany = int.MinValue;
-                    new_appointment.InsuredAddress = file.Address;                    
-                    new_appointment.InsuredPopulation = file.Population;                    
+                    try { new_appointment.IDClaim = Convert.ToInt32(file.ExternalID); } catch { new_appointment.IDClaim = int.MinValue; }
+                    try { new_appointment.IDFirm = Convert.ToInt32(file.ExternalIDFirm); } catch { new_appointment.IDFirm = int.MinValue; }
+                    new_appointment.InsuredAddress = file.Address;
+                    new_appointment.InsuredPopulation = file.Population;
                     new_appointment.InsuredProvince = file.Province;
                     new_appointment.InsuredPostalCode = file.PostalCode;
                     new_appointment.InsuredTel1 = file.Phone1;
@@ -402,6 +396,15 @@ namespace pga.core
                     new_appointment.InsuredTelFax = file.Phone3;
                     new_appointment.PolicyNumber = file.Policy;
                     new_appointment.UrgentClaim = file.Urgent;
+
+
+                    new_appointment.IDAdministrator = int.MinValue;                    
+                    new_appointment.IdCompany = int.MinValue;
+                    
+                    new_appointment.IDGuild = int.MinValue;                    
+                    new_appointment.IdRepairer = int.MinValue;
+                    new_appointment.IdSubCompany = int.MinValue;
+                    
                 }
                 result.Add(new_appointment);
             }

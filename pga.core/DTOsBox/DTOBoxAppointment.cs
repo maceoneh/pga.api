@@ -24,8 +24,11 @@ namespace pga.core.DTOsBox
 
         [Filter(Name = FilterExternalID)]
         [Index(Name = IdxExternalID, Unique = true)]
-        [Field(FieldName = "external_id", Type = ParamType.Int32)]
-        internal int ExternalID { get; set; }
+        [Field(FieldName = "external_id", Type = ParamType.String)]
+        public string? ExternalID { get; set; }
+
+        [Field(FieldName = "external_id_master_detail")]
+        public string? ExternalIDMasterDetail { get; set; }
 
         public List<DTOBoxEmployInAppointment>? EmployeesInAppointment { get; set; } = null;
 
@@ -63,6 +66,8 @@ namespace pga.core.DTOsBox
             a.RefFile = this.RefFile;
             a.RefReceiver = this.RefReceiver;            
             a.UUID = this.UUID;
+            a.ExternalID = this.ExternalID;
+            a.ExternalIDMasterDetail = this.ExternalIDMasterDetail;
             a.EmployeesInAppointment = new List<DTOBoxEmployInAppointment>(this.EmployeesInAppointment.Count);
             foreach (var item in this.EmployeesInAppointment)
             {
@@ -104,7 +109,6 @@ namespace pga.core.DTOsBox
         public int IdCompany { get; set; }
         public int IdSubCompany { get; set; }
         public int IDGuild { get; set; }
-        public int IDMasterDetail { get; set; }
         public int IdRepairer { get; set; }
         public bool UrgentClaim { get; set; }
 

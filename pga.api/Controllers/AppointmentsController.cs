@@ -41,7 +41,8 @@ namespace pga.api.Controllers
                     Province = a.Province,
                     Population = a.Population,
                     Description = a.Description,
-                    Date = a.DateFrom
+                    Date = a.DateFrom,
+                    ExternalID = a.ExternalIDFile,
                 });
                 //Se busca al empleado y si no existe se crea
                 var employ = await subjecthelper.GetEmployByPGAMobileUser(a.PGAMobileUser);
@@ -69,6 +70,7 @@ namespace pga.api.Controllers
                     DateTo = a.DateFrom.AddHours(1),
                     Description = a.Description,
                     GuildDescription = a.Guild,
+                    ExternalID = a.ExternalID,
                     EmployeesInAppointment = employees
                 }, f);
                 if (new_appointment != null)

@@ -29,6 +29,7 @@ namespace pga.core.DTOsBox
         public const string FilterStatus = TAG + "Status";
         public const string FilterNumber = TAG + "Number";
         public const string FilterInternalNumber = TAG + "NumberInternal";
+        public const string FilterExternalID = TAG + "ExternalID";
         public const string IdxUUID = TAG + "UUID";
         public const string IdxRefReceiver = TAG + "RefInsured";
         public const string IdxRefProvider = TAG + "RefProvider";
@@ -40,6 +41,7 @@ namespace pga.core.DTOsBox
         public const string IdxEmail = TAG + "EMail";
         public const string IdxNumber = TAG + "Number";
         public const string IdxInternalNumber = TAG + "InternalNumber";
+        public const string IdxExternalID = TAG + "ExternalID";
 
         /// <summary>
         /// Listado de citas asociadas a un expediente
@@ -82,15 +84,27 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "uuid", Type = ParamType.String)]
         public string? UUID { get; set; }
 
+        [JsonPropertyName("number")]
         [Index(Name = IdxNumber)]
         [Filter(Name = FilterNumber)]
         [Field(FieldName = "number", Type = ParamType.String)]
         public string Number { get; set; }
 
+        [JsonPropertyName("internalNumber")]
         [Index(Name = IdxInternalNumber)]
         [Filter(Name = FilterInternalNumber)]
         [Field(FieldName = "internal_number", Type = ParamType.String)]
         public string? InternalNumber { get; set; }
+
+        [JsonPropertyName("externalID")]
+        [Index(Name = IdxExternalID)]
+        [Filter(Name = FilterExternalID)]
+        [Field(FieldName = "external_id", Type = ParamType.String)]
+        public string? ExternalID { get; set; }
+
+        [JsonPropertyName("externalIDFirm")]
+        [Field(FieldName = "external_id_firm", Type = ParamType.String)]
+        public string? ExternalIDFirm { get; set; }
 
         [JsonPropertyName("policy")]
         [Index(Name = IdxPolicy)]
@@ -139,18 +153,23 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "population", Type = ParamType.String, AllowNull = true)]
         public string? Population { get; set; }
 
+        [JsonPropertyName("phone1")]
         [Field(FieldName = "phone1", Type = ParamType.String, AllowNull = true)]
         public string? Phone1 { get; set; }
 
+        [JsonPropertyName("phone2")]
         [Field(FieldName = "phone2", Type = ParamType.String, AllowNull = true)]
         public string? Phone2 { get; set; }
 
+        [JsonPropertyName("phone3")]
         [Field(FieldName = "phone3", Type = ParamType.String, AllowNull = true)]
         public string? Phone3 { get; set; }
 
+        [JsonPropertyName("phoneFax")]
         [Field(FieldName = "phone_fax", Type = ParamType.String, AllowNull = true)]
         public string? PhoneFax { get; set; }
 
+        [JsonPropertyName("urgent")]
         [Field(FieldName = "urgent", Type = ParamType.Boolean, DefaultValue = false)]
         public bool Urgent { get; set; }
 
