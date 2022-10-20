@@ -8,6 +8,7 @@ using SQLitePCL;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace pga.core
@@ -217,6 +218,23 @@ namespace pga.core
             //a.ExternalID = Token.getRandomID();
             a.RefFile = f.ID;
             a.RefReceiver = f.RefReceiver;
+            //Se obtienen los datos del gremio
+            if (a.GuildDescription != null)
+            {
+                var guildhelper = this.Box.GetBoxGuildHelper();
+                var guilds = await guildhelper.GetListAsync();
+                //Se busca el id del gremio y si no se crea
+                var guild = guilds.Where(reg => reg.Name == a.GuildDescription.ToUpper().Trim()).FirstOrDefault();
+                if (guild == null)
+                {
+                    guild = await guildhelper.AddSync(a.GuildDescription);
+                }
+                a.RefGuild = guild.ID;
+            }
+            else
+            {
+                a.RefGuild = int.MinValue;
+            }
             //Se agregan registros en la base de datos
             var db_appointments = await this.Box.DBLogic.ProxyStatement<DTOBoxAppointment>();
             if (await db_appointments.insertAsync(a))
@@ -390,18 +408,15 @@ namespace pga.core
                     new_appointment.InsuredPopulation = file.Population;
                     new_appointment.InsuredProvince = file.Province;
                     new_appointment.InsuredPostalCode = file.PostalCode;
-                    new_appointment.InsuredTel1 = file.Phone1;
-                    new_appointment.InsuredTel2 = file.Phone2;
-                    new_appointment.InsuredTel3 = file.Phone3;
-                    new_appointment.InsuredTelFax = file.Phone3;
+                    new_appointment.ContactPhone1 = file.PhoneContact1;
+                    new_appointment.ContactPhone2 = file.PhoneContact2;
+                    new_appointment.ContactPhone3 = file.PhoneContact3;                    
                     new_appointment.PolicyNumber = file.Policy;
                     new_appointment.UrgentClaim = file.Urgent;
 
 
                     new_appointment.IDAdministrator = int.MinValue;                    
-                    new_appointment.IdCompany = int.MinValue;
-                    
-                    new_appointment.IDGuild = int.MinValue;                    
+                    new_appointment.IdCompany = int.MinValue;                    
                     new_appointment.IdRepairer = int.MinValue;
                     new_appointment.IdSubCompany = int.MinValue;
                     

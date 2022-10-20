@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32630.192
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pga.api", "pga.api\pga.api.csproj", "{3E51A3A8-449C-49F9-AC96-863AAF58C4F0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pga.api", "pga.api\pga.api.csproj", "{3E51A3A8-449C-49F9-AC96-863AAF58C4F0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pga.core", "pga.core\pga.core.csproj", "{6360AA71-8140-4A55-8299-CBCC513FED83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "pga.core", "pga.core\pga.core.csproj", "{6360AA71-8140-4A55-8299-CBCC513FED83}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ns.utils", "..\utils\utils\ns.utils.csproj", "{5790F482-B7E5-4556-9BB6-6DD0D1F0E4BE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ns.utils.corenet", "..\utils\utils.corenet\ns.utils.corenet.csproj", "{03E5D90E-2C73-4A06-B0A4-5B6A66C26752}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "pga.api.soap", "pga.api.soap\pga.api.soap.csproj", "{E24129ED-DD6D-4B34-A04D-33D71AEF74E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{03E5D90E-2C73-4A06-B0A4-5B6A66C26752}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03E5D90E-2C73-4A06-B0A4-5B6A66C26752}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03E5D90E-2C73-4A06-B0A4-5B6A66C26752}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E24129ED-DD6D-4B34-A04D-33D71AEF74E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E24129ED-DD6D-4B34-A04D-33D71AEF74E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E24129ED-DD6D-4B34-A04D-33D71AEF74E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E24129ED-DD6D-4B34-A04D-33D71AEF74E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

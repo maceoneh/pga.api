@@ -6,7 +6,6 @@ using System.Xml.Linq;
 
 namespace pga.api.DTOs
 {
-
     public class DTORequestCreateAppointment
     {
         [JsonPropertyName("userPGAMobile")]

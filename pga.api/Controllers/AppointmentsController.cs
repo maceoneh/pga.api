@@ -61,7 +61,7 @@ namespace pga.api.Controllers
                 var employees = new List<DTOBoxEmployInAppointment> { new DTOBoxEmployInAppointment { 
                     Employ = employ,
                     Leading = true
-                } };
+                } };                
                 //Se crea una cita en el expediente
                 var new_appointment = await filehelper.AddAppointmentAsync(new DTOBoxAppointment
                 {

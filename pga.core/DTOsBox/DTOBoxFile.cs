@@ -153,21 +153,29 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "population", Type = ParamType.String, AllowNull = true)]
         public string? Population { get; set; }
 
-        [JsonPropertyName("phone1")]
-        [Field(FieldName = "phone1", Type = ParamType.String, AllowNull = true)]
-        public string? Phone1 { get; set; }
+        [JsonPropertyName("contactPerson1")]
+        [Field(FieldName = "contact_person_1", Type = ParamType.String, AllowNull = true)]
+        public string? ContactPerson1 { get; set; }
 
-        [JsonPropertyName("phone2")]
-        [Field(FieldName = "phone2", Type = ParamType.String, AllowNull = true)]
-        public string? Phone2 { get; set; }
+        [JsonPropertyName("phoneContact1")]
+        [Field(FieldName = "phone_contact_1", Type = ParamType.String, AllowNull = true)]
+        public string? PhoneContact1 { get; set; }
 
-        [JsonPropertyName("phone3")]
-        [Field(FieldName = "phone3", Type = ParamType.String, AllowNull = true)]
-        public string? Phone3 { get; set; }
+        [JsonPropertyName("contactPerson2")]
+        [Field(FieldName = "contact_person_2", Type = ParamType.String, AllowNull = true)]
+        public string? ContactPerson2 { get; set; }
 
-        [JsonPropertyName("phoneFax")]
-        [Field(FieldName = "phone_fax", Type = ParamType.String, AllowNull = true)]
-        public string? PhoneFax { get; set; }
+        [JsonPropertyName("phoneContact2")]
+        [Field(FieldName = "phone_contact_2", Type = ParamType.String, AllowNull = true)]
+        public string? PhoneContact2 { get; set; }
+
+        [JsonPropertyName("contactPerson3")]
+        [Field(FieldName = "contact_person_3", Type = ParamType.String, AllowNull = true)]
+        public string? ContactPerson3 { get; set; }
+
+        [JsonPropertyName("phoneContact3")]
+        [Field(FieldName = "phone_contact_3", Type = ParamType.String, AllowNull = true)]
+        public string? PhoneContact3 { get; set; }
 
         [JsonPropertyName("urgent")]
         [Field(FieldName = "urgent", Type = ParamType.Boolean, DefaultValue = false)]
@@ -192,10 +200,9 @@ namespace pga.core.DTOsBox
             f.RefReceiver = this.RefReceiver;
             f.Status = this.Status;
             f.UUID = this.UUID;
-            f.Phone1 = this.Phone1;
-            f.Phone2 = this.Phone2;
-            f.Phone3 = this.Phone3;
-            f.PhoneFax = this.PhoneFax;
+            f.PhoneContact1 = this.PhoneContact1;
+            f.PhoneContact2 = this.PhoneContact2;
+            f.PhoneContact3 = this.PhoneContact3;
             f.Urgent = this.Urgent;
             if (this.Receiver != null)
             {

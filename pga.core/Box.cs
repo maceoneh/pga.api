@@ -185,6 +185,7 @@ namespace pga.core
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxFile>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxCounter>();
                 await this.DBLogic.Management.createAlterTableAsync<DTOBoxMessage>();
+                await this.DBLogic.Management.createAlterTableAsync<DTOBoxGuild>();
 
                 using (var filehelper = new TextPlainFile(path + @"\version.json"))
                 {
@@ -416,6 +417,11 @@ namespace pga.core
         public BoxMessage GetBoxMessageHelper()
         {
             return new BoxMessage(this);
+        }
+
+        public BoxGuild GetBoxGuildHelper()
+        {
+            return new BoxGuild(this);
         }
 
         protected virtual void Dispose(bool disposing)

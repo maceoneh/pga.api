@@ -50,6 +50,9 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "guild_description", Type = ParamType.String)]
         public string? GuildDescription { get; set; }
 
+        [Field(FieldName = "ref_guild", Type = ParamType.Int32, DefaultValue = int.MinValue)]
+        internal int RefGuild { get; set; }
+
         [Field(FieldName = "agreed", Type = ParamType.Boolean, DefaultValue = false)]
         public bool Agreed { get; set; }
 
@@ -98,17 +101,15 @@ namespace pga.core.DTOsBox
         public string? InsuredPopulation { get; set; }
         public string? InsuredPostalCode { get; set; }
         public string? InsuredProvince { get; set; }
-        public string? InsuredTel1 { get; set; }
-        public string? InsuredTel2 { get; set; }
-        public string? InsuredTel3 { get; set; }
-        public string? InsuredTelFax { get; set; }
+        public string? ContactPhone1 { get; set; }
+        public string? ContactPhone2 { get; set; }
+        public string? ContactPhone3 { get; set; }
         public string? PolicyNumber { get; set; }
         public int IDAdministrator { get; set; }
         public int IDFirm { get; set; }
         public int IDClaim { get; set; }
         public int IdCompany { get; set; }
         public int IdSubCompany { get; set; }
-        public int IDGuild { get; set; }
         public int IdRepairer { get; set; }
         public bool UrgentClaim { get; set; }
 
