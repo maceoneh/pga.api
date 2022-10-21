@@ -144,7 +144,7 @@ namespace pga.core
             f.Status = EBoxFileStatus.InProgress;
             f.UUID = Guid.NewGuid().ToString();
             var counterhelper = this.Box.GetBoxCountersHelper();
-            f.InternalNumber = (await counterhelper.GetNextAsync(EBoxCounterType.AppointmentInternalNumber)).ToString();
+            f.Code = (await counterhelper.GetNextAsync(EBoxCounterType.AppointmentInternalNumber)).ToString();
             //Se inserta el expediente en la base de datos
             var db_file = await this.Box.DBLogic.ProxyStatement<DTOBoxFile>();
             if (await db_file.insertAsync(f))
@@ -218,6 +218,10 @@ namespace pga.core
             //a.ExternalID = Token.getRandomID();
             a.RefFile = f.ID;
             a.RefReceiver = f.RefReceiver;
+            //Se obtiene el codigo
+            var countershelper = this.Box.GetBoxCountersHelper();
+            var codenumber = await countershelper.GetNextAsync(EBoxCounterType.AppointmentInternalNumber, a.DateTo.Year.ToString());
+            a.Code = a.DateTo.Year.ToString() + "/" + codenumber.ToString();
             //Se obtienen los datos del gremio
             if (a.GuildDescription != null)
             {
@@ -367,9 +371,43 @@ namespace pga.core
             }
             //Se carga el listado de expedientes al que se hace referencia
             var db_files = await this.Box.DBLogic.ProxyStatement<DTOBoxFile>();
-            var files = await db_files.selectAsync<DTOBoxFile>(new StatementOptions { 
-                Filters = new List<Filter> { 
+            var files = await db_files.selectAsync<DTOBoxFile>(new StatementOptions
+            {
+                Filters = new List<Filter> {
                     new Filter { Name = DTOBoxFile.FilterID, ObjectValue = ids, Type = FilterType.In }
+                }
+            });
+            //Se cargan los subjects necesarios
+            var ref_subjects = new List<int>();
+            foreach (var item in files)
+            {
+                if (item.RefReceiver > int.MinValue)
+                {
+                    if (!ref_subjects.Contains(item.RefReceiver))
+                    {
+                        ref_subjects.Add(item.RefReceiver);
+                    }
+                }
+                if (item.RefProvider > int.MinValue)
+                {
+                    if (!ref_subjects.Contains(item.RefProvider))
+                    {
+                        ref_subjects.Add(item.RefProvider);
+                    }
+                }
+                if (item.RefIntermediary > int.MinValue)
+                {
+                    if (!ref_subjects.Contains(item.RefIntermediary))
+                    {
+                        ref_subjects.Add(item.RefIntermediary);
+                    }
+                }
+            }
+            var db_subjects = await this.Box.DBLogic.ProxyStatement<DTOBoxSubject>();
+            var subjects = await db_subjects.selectAsync<DTOBoxSubject>(new StatementOptions
+            {
+                Filters = new List<Filter> {
+                    new Filter { Name = DTOBoxSubject.FilterID, ObjectValue = ref_subjects, Type = FilterType.In }
                 }
             });
             //Se carga la información extendida
@@ -381,26 +419,36 @@ namespace pga.core
                 if (file != null)
                 {
                     new_appointment.DescPhase = "";
+                    file.Receiver = subjects.Where(reg => reg.ID == file.RefReceiver).FirstOrDefault();
                     if (file.Receiver != null)
                     {
                         new_appointment.InsuredDNI = "";
                         new_appointment.InsuredMail = file.Receiver.eMail;
-                        new_appointment.InsuredName = file.Receiver.Name;                        
+                        new_appointment.InsuredName = file.Receiver.Name;
                     }
                     else
                     {
                         new_appointment.InsuredDNI = "";
                         new_appointment.InsuredMail = "";
-                        new_appointment.InsuredName = "";                        
+                        new_appointment.InsuredName = "";
                     }
+                    file.Provider = subjects.Where(reg => reg.ID == file.RefProvider).FirstOrDefault();
                     if (file.Provider != null)
                     {
                         new_appointment.DescProvider = file.Provider.Name;
-                                           
-                    }                    
+                        new_appointment.IdCompany = file.Provider.ID;
+                        new_appointment.IdSubCompany = -1;
+
+                    }
+                    file.Intermediary = subjects.Where(reg => reg.ID == file.RefIntermediary).FirstOrDefault();
                     if (file.Intermediary != null)
                     {
                         new_appointment.DescProvider = file.Intermediary.Name;
+                        new_appointment.IdCompany = file.Intermediary.ID;
+                        if (file.Provider != null)
+                        {
+                            new_appointment.IdSubCompany = file.Provider.ID;
+                        }
                     }
                     try { new_appointment.IDClaim = Convert.ToInt32(file.ExternalID); } catch { new_appointment.IDClaim = int.MinValue; }
                     try { new_appointment.IDFirm = Convert.ToInt32(file.ExternalIDFirm); } catch { new_appointment.IDFirm = int.MinValue; }
@@ -410,16 +458,10 @@ namespace pga.core
                     new_appointment.InsuredPostalCode = file.PostalCode;
                     new_appointment.ContactPhone1 = file.PhoneContact1;
                     new_appointment.ContactPhone2 = file.PhoneContact2;
-                    new_appointment.ContactPhone3 = file.PhoneContact3;                    
+                    new_appointment.ContactPhone3 = file.PhoneContact3;
                     new_appointment.PolicyNumber = file.Policy;
-                    new_appointment.UrgentClaim = file.Urgent;
-
-
-                    new_appointment.IDAdministrator = int.MinValue;                    
-                    new_appointment.IdCompany = int.MinValue;                    
-                    new_appointment.IdRepairer = int.MinValue;
-                    new_appointment.IdSubCompany = int.MinValue;
-                    
+                    new_appointment.UrgentFile = file.Urgent;
+                    new_appointment.IDGuild = item.RefGuild;
                 }
                 result.Add(new_appointment);
             }
@@ -436,7 +478,8 @@ namespace pga.core
             {
                 //Se obtienen los appointments con los que esta asociado
                 var db_employ_in_appointment = await this.Box.DBLogic.ProxyStatement<DTOBoxEmployInAppointment>();
-                var employ_in_appointment = await db_employ_in_appointment.selectAsync<DTOBoxEmployInAppointment>(new StatementOptions {
+                var employ_in_appointment = await db_employ_in_appointment.selectAsync<DTOBoxEmployInAppointment>(new StatementOptions
+                {
                     Filters = new List<Filter> {
                         new Filter { Name = DTOBoxEmployInAppointment.FilterRefEmploy, ObjectValue = subject.ID, Type = FilterType.Equal }
                     }
@@ -486,8 +529,9 @@ namespace pga.core
                         ids.Add(item.RefAppointment);
                     }
                     var db_appointmets_archive = await this.Box.DBLogic.ProxyStatement<DTOBoxAppointmentArchive>();
-                    var appointments_archive = await db_appointmets_archive.selectAsync<DTOBoxAppointmentArchive>(new StatementOptions { 
-                        Filters = new List<Filter> { 
+                    var appointments_archive = await db_appointmets_archive.selectAsync<DTOBoxAppointmentArchive>(new StatementOptions
+                    {
+                        Filters = new List<Filter> {
                             new Filter { Name = DTOBoxAppointmentArchive.FilterID, ObjectValue = ids, Type = FilterType.In }
                         }
                     });
@@ -507,7 +551,7 @@ namespace pga.core
                     //Se eliminan los resultados que no pertenecen al usuario que hace la consulta
                     using (var permissionhelper = new Permissions(this.Box.DataPath))
                     {
-                       appointments_archive = await permissionhelper.FilterByDataPermission<DTOBoxAppointmentArchive>(appointments_archive, (await this.Box.WhoIs()).UUID);
+                        appointments_archive = await permissionhelper.FilterByDataPermission<DTOBoxAppointmentArchive>(appointments_archive, (await this.Box.WhoIs()).UUID);
                     }
                     //Se agregan al listado principal
                     appointments.AddRange(appointments_archive);
@@ -523,6 +567,12 @@ namespace pga.core
                             item.Employ = employees.Where(reg => reg.ID == item.RefEmploy).FirstOrDefault().CopyTo(new DTOBoxSubject());
                         }
                     }
+                }
+                //Se extiende la información
+                if (extend)
+                {
+                    var appointments_extend = await this.CompleteAppointments(appointments);
+                    appointments = appointments_extend;
                 }
 
                 return appointments;

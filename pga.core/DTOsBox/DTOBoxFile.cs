@@ -90,11 +90,11 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "number", Type = ParamType.String)]
         public string Number { get; set; }
 
-        [JsonPropertyName("internalNumber")]
+        [JsonPropertyName("code")]
         [Index(Name = IdxInternalNumber)]
         [Filter(Name = FilterInternalNumber)]
-        [Field(FieldName = "internal_number", Type = ParamType.String)]
-        public string? InternalNumber { get; set; }
+        [Field(FieldName = "code", Type = ParamType.String)]
+        public string? Code { get; set; }
 
         [JsonPropertyName("externalID")]
         [Index(Name = IdxExternalID)]
@@ -189,7 +189,7 @@ namespace pga.core.DTOsBox
             f.Date = this.Date;
             f.Description = this.Description;
             f.ID = this.ID;
-            f.InternalNumber = this.InternalNumber;
+            f.Code = this.Code;
             f.Number = this.Number;
             f.Policy = this.Policy;
             f.Population = this.Population;

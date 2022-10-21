@@ -113,39 +113,40 @@ namespace pga.api.DTOs
             this.AgreedAppointment = a.Agreed;
             this.AppointmentDate = a.DateFrom.ToString("dd/MM/yyyy");
             this.Hour = a.DateFrom.ToString("HH:mm");
-            this.DescGuild = a.GuildDescription;
-            this.AssistanceNumber = null;
-            this.ClaimInternalCode = null;
-            this.ClaimNumber = null;
-            this.Code = null;
+            this.DescGuild = a.GuildDescription;            
+            this.Code = a.Code;
             this.Description = a.Description;
             this.PGAMobileStatus = 2;
 
             if (a is DTOBoxAppointmentExtend)
             {
-                this.DescPhase = null;
-                this.DescProvider = null;
-                this.IDAdministrator = int.MinValue;
-                this.IDFirm = int.MinValue;
-                this.IDClaim = int.MinValue;
-                this.IdCompany = int.MinValue;
-                this.IDGuild = int.MinValue;
-                this.IDMasterDetail = int.MinValue;
-                this.IdRepairer = int.MinValue;
-                this.IdSubCompany = int.MinValue;
-                this.InsuredAddress = null;
-                this.InsuredDNI = null;
-                this.InsuredMail = null;
-                this.InsuredName = null;
-                this.InsuredPopulation = null;
-                this.InsuredPostalCode = null;
-                this.InsuredProvince = null;
-                this.InsuredTel1 = null;
-                this.InsuredTel2 = null;
-                this.InsuredTel3 = null;
+                var extend = (DTOBoxAppointmentExtend)a;                
+                this.DescPhase = extend.DescPhase;
+                this.DescProvider = extend.DescProvider;
+                this.IDAdministrator = extend.IDAdministrator;
+                this.IDFirm = extend.IDFirm;
+                this.IDClaim = extend.IDClaim;
+                this.IdCompany = extend.IdCompany;
+                this.IDGuild = extend.IDGuild;
+                try { this.IDMasterDetail = Convert.ToInt32(a.ExternalIDMasterDetail); } catch { this.IDMasterDetail = -1; }
+                this.IdRepairer = extend.IdRepairer;
+                this.IdSubCompany = extend.IdSubCompany;
+                this.InsuredAddress = extend.InsuredAddress;
+                this.InsuredDNI = extend.InsuredDNI;
+                this.InsuredMail = extend.InsuredMail;
+                this.InsuredName = extend.InsuredName;
+                this.InsuredPopulation = extend.InsuredPopulation;
+                this.InsuredPostalCode = extend.InsuredPostalCode;
+                this.InsuredProvince = extend.InsuredProvince;
+                this.InsuredTel1 = extend.ContactPhone1;
+                this.InsuredTel2 = extend.ContactPhone2;
+                this.InsuredTel3 = extend.ContactPhone3;
                 this.InsuredTelFax = null;
-                this.PolicyNumber = null;
-                this.UrgentClaim = false;
+                this.PolicyNumber = extend.PolicyNumber;
+                this.UrgentClaim = extend.UrgentFile;
+                this.AssistanceNumber = extend.FileIntermediaryNumber;
+                this.ClaimNumber = extend.FileNumber;
+                this.ClaimInternalCode = extend.FileCode;
             }
         }
     }

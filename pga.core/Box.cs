@@ -350,11 +350,14 @@ namespace pga.core
         /// </summary>
         /// <param name="registry"></param>
         /// <returns></returns>
-        internal async Task CheckPermissionAndFirAsynce(object registry)
+        internal async Task CheckPermissionAndFireAsynce(object registry)
         {
-            using (var permissionhelper = new Permissions(this.DataPath))
+            if (!this.MaintenanceMode)
             {
-                await permissionhelper.CheckCanReadPermissionAsync(registry, (await this.WhoIs()).UUID, true);
+                using (var permissionhelper = new Permissions(this.DataPath))
+                {
+                    await permissionhelper.CheckCanReadPermissionAsync(registry, (await this.WhoIs()).UUID, true);
+                }
             }
         }
 

@@ -1,6 +1,7 @@
 ﻿using es.dmoreno.utils.dataaccess.db;
 using es.dmoreno.utils.dataaccess.filters;
 using es.dmoreno.utils.permissions;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -27,8 +28,11 @@ namespace pga.core.DTOsBox
         [Field(FieldName = "external_id", Type = ParamType.String)]
         public string? ExternalID { get; set; }
 
-        [Field(FieldName = "external_id_master_detail")]
+        [Field(FieldName = "external_id_master_detail", Type = ParamType.String)]
         public string? ExternalIDMasterDetail { get; set; }
+
+        [Field(FieldName = "code", Type = ParamType.String)]
+        public string? Code { get; set; }
 
         public List<DTOBoxEmployInAppointment>? EmployeesInAppointment { get; set; } = null;
 
@@ -105,14 +109,18 @@ namespace pga.core.DTOsBox
         public string? ContactPhone2 { get; set; }
         public string? ContactPhone3 { get; set; }
         public string? PolicyNumber { get; set; }
-        public int IDAdministrator { get; set; }
-        public int IDFirm { get; set; }
-        public int IDClaim { get; set; }
-        public int IdCompany { get; set; }
-        public int IdSubCompany { get; set; }
-        public int IdRepairer { get; set; }
-        public bool UrgentClaim { get; set; }
-
+        public int IDAdministrator { get; set; } = int.MinValue;
+        public int IDFirm { get; set; } = int.MinValue;
+        public int IDClaim { get; set; } = int.MinValue;
+        public int IdCompany { get; set; } = int.MinValue;
+        public int IdSubCompany { get; set; } = int.MinValue;
+        public int IdRepairer { get; set; } = int.MinValue;
+        public int IDGuild { get; set; } = int.MinValue;
+        public bool UrgentFile { get; set; }
+        public string? FileIntermediaryNumber { get; set; }
+        public string? FileNumber { get; set; }
+        public string? FileCode { get; set; }
+        
         public DTOBoxAppointmentExtend(DTOBoxAppointment a)
         {
             a.CopyTo(this);

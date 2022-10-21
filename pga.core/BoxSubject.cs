@@ -275,7 +275,7 @@ namespace pga.core
                 s.UUID = Guid.NewGuid().ToString();
                 await db_subjects.insertAsync(s);                
             }
-            await this.Box.CheckPermissionAndFirAsynce(s);
+            await this.Box.CheckPermissionAndFireAsynce(s);
             return s;
         }
 

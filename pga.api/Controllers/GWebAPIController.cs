@@ -180,9 +180,17 @@ namespace pga.api.Controllers
         {
             using (var boxhelper = new Box(uuid_provider, token))
             {
-                if (infoquery.Query == "workorderbyemploy")
+                if (infoquery.Query.ToUpper().Trim() == "WORKORDERBYEMPLOY")
                 {
-                    return new DTOResponseGWebAPIGetQuery { };
+                    var filehelper = boxhelper.GetBoxFileHelper();
+                    var list = await filehelper.GetAppointmentsByEmployAsync((await boxhelper.WhoIs()).UUID, false, true);                   
+                    var response = new DTOResponseGWebAPIGetQuery {  };
+                    response.WorkorderByEmploy = new List<DTOResponseGWebAPIGetQueryWorkOrderByEmploy>(list.Count);
+                    foreach (var item in list)
+                    {
+                        response.WorkorderByEmploy.Add(new DTOResponseGWebAPIGetQueryWorkOrderByEmploy(item));
+                    }
+                    return response;
                 }
                 else
                 {
